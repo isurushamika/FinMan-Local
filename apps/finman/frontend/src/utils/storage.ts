@@ -1,8 +1,10 @@
-import { Transaction, Budget, RecurringTransaction } from '../types';
+import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase } from '../types';
 
 const STORAGE_KEY = 'financial_transactions';
 const BUDGETS_KEY = 'financial_budgets';
 const RECURRING_KEY = 'financial_recurring';
+const ITEMS_KEY = 'financial_items';
+const PURCHASES_KEY = 'financial_purchases';
 
 export const saveTransactions = (transactions: Transaction[]): void => {
   try {
@@ -54,6 +56,44 @@ export const loadRecurring = (): RecurringTransaction[] => {
     return data ? JSON.parse(data) : [];
   } catch (error) {
     console.error('Error loading recurring transactions:', error);
+    return [];
+  }
+};
+
+// Items storage
+export const saveItems = (items: Item[]): void => {
+  try {
+    localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error('Error saving items:', error);
+  }
+};
+
+export const loadItems = (): Item[] => {
+  try {
+    const data = localStorage.getItem(ITEMS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error loading items:', error);
+    return [];
+  }
+};
+
+// Purchases storage
+export const savePurchases = (purchases: ItemPurchase[]): void => {
+  try {
+    localStorage.setItem(PURCHASES_KEY, JSON.stringify(purchases));
+  } catch (error) {
+    console.error('Error saving purchases:', error);
+  }
+};
+
+export const loadPurchases = (): ItemPurchase[] => {
+  try {
+    const data = localStorage.getItem(PURCHASES_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error loading purchases:', error);
     return [];
   }
 };

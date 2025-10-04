@@ -104,8 +104,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onDelet
                           : 'text-red-600 dark:text-red-400'
                       }`}
                     >
-                      {transaction.type === 'income' ? '+' : '-'}$
-                      {transaction.amount.toFixed(2)}
+                      {transaction.type === 'income' ? '+' : '-'}LKR {transaction.amount.toFixed(2)}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {format(new Date(transaction.date), 'MMM dd, yyyy')}

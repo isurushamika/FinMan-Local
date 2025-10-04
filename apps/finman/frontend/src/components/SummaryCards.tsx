@@ -46,7 +46,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ transactions }) => {
         <div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{title}</p>
           <p className={`text-2xl font-bold ${color}`}>
-            ${Math.abs(amount).toFixed(2)}
+            LKR {Math.abs(amount).toFixed(2)}
           </p>
           {trend && (
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

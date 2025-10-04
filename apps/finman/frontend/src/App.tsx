@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Transaction, Budget, RecurringTransaction } from './types';
-import { loadTransactions, saveTransactions, loadBudgets, saveBudgets, loadRecurring, saveRecurring } from './utils/storage';
+import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase } from './types';
+import { loadTransactions, saveTransactions, loadBudgets, saveBudgets, loadRecurring, saveRecurring, loadItems, saveItems, loadPurchases, savePurchases } from './utils/storage';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import SummaryCards from './components/SummaryCards';
@@ -9,15 +9,18 @@ import { BudgetManager } from './components/BudgetManager';
 import { RecurringTransactions } from './components/RecurringTransactions';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { DataManagement } from './components/DataManagement';
-import { BarChart3, Plus, List, Wallet, Repeat, Download } from 'lucide-react';
+import ItemTracker from './components/ItemTracker';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package } from 'lucide-react';
 import './index.css';
 
 function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
+  const [purchases, setPurchases] = useState<ItemPurchase[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'data'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'data'>('dashboard');
 
   useEffect(() => {
     const loaded = loadTransactions();
@@ -29,6 +32,12 @@ function App() {
     
     const loadedRecurring = loadRecurring();
     setRecurring(loadedRecurring);
+
+    const loadedItems = loadItems();
+    setItems(loadedItems);
+
+    const loadedPurchases = loadPurchases();
+    setPurchases(loadedPurchases);
   }, []);
 
   useEffect(() => {
@@ -43,6 +52,14 @@ function App() {
   useEffect(() => {
     saveRecurring(recurring);
   }, [recurring]);
+
+  useEffect(() => {
+    saveItems(items);
+  }, [items]);
+
+  useEffect(() => {
+    savePurchases(purchases);
+  }, [purchases]);
 
   // Auto-generate recurring transactions
   useEffect(() => {
@@ -148,6 +165,19 @@ function App() {
     }
   };
 
+  const handleAddItem = (item: Omit<Item, 'id'>) => {
+    const newItem: Item = {
+      ...item,
+      id: Date.now().toString(),
+    };
+    setItems([...items, newItem]);
+  };
+
+  const handleDeleteItem = (id: string) => {
+    setItems(items.filter((item) => item.id !== id));
+    setPurchases(purchases.filter((purchase) => purchase.itemId !== id));
+  };
+
   const handleImportData = (data: {
     transactions: Transaction[];
     budgets: Budget[];
@@ -180,6 +210,7 @@ function App() {
       <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[72px] z-10 overflow-x-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-1 min-w-max">
+            {/* Overview Section */}
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
@@ -191,6 +222,11 @@ function App() {
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
             </button>
+
+            {/* Divider */}
+            <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
+
+            {/* Transactions Section */}
             <button
               onClick={() => setActiveTab('transactions')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
@@ -213,6 +249,11 @@ function App() {
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Add New</span>
             </button>
+
+            {/* Divider */}
+            <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
+
+            {/* Planning Section */}
             <button
               onClick={() => setActiveTab('budgets')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
@@ -235,6 +276,27 @@ function App() {
               <Repeat className="w-4 h-4" />
               <span className="hidden sm:inline">Recurring</span>
             </button>
+
+            {/* Divider */}
+            <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
+
+            {/* Tracking Section */}
+            <button
+              onClick={() => setActiveTab('items')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
+                activeTab === 'items'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Package className="w-4 h-4" />
+              <span className="hidden sm:inline">Price Tracker</span>
+            </button>
+
+            {/* Divider */}
+            <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
+
+            {/* Data Section */}
             <button
               onClick={() => setActiveTab('data')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
@@ -311,6 +373,15 @@ function App() {
             onAdd={handleAddRecurring}
             onToggle={handleToggleRecurring}
             onDelete={handleDeleteRecurring}
+          />
+        )}
+
+        {activeTab === 'items' && (
+          <ItemTracker
+            items={items}
+            purchases={purchases}
+            onAddItem={handleAddItem}
+            onDeleteItem={handleDeleteItem}
           />
         )}
 

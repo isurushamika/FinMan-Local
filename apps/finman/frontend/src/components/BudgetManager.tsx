@@ -135,7 +135,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
             </div>
 
             <div>
-              <label className="label">Budget Amount</label>
+              <label className="label">Budget Amount (LKR)</label>
               <input
                 type="number"
                 value={amount}
@@ -202,7 +202,7 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                 <div className="mb-3">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-700 dark:text-gray-300 font-medium">
-                      ${progress.spent.toFixed(2)} of ${progress.budgeted.toFixed(2)}
+                      LKR {progress.spent.toFixed(2)} of LKR {progress.budgeted.toFixed(2)}
                     </span>
                     <span className={`font-semibold ${progress.status === 'exceeded' ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
                       {progress.percentage.toFixed(0)}%

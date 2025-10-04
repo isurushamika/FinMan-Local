@@ -106,7 +106,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onAdd, onCancel }) =>
         <div>
           <label className="label">
             <DollarSign className="inline w-4 h-4 mr-1" />
-            Amount
+            Amount (LKR)
           </label>
           <input
             type="number"

@@ -122,7 +122,7 @@ export const RecurringTransactions: React.FC<RecurringTransactionsProps> = ({
             </div>
 
             <div>
-              <label className="label">Amount</label>
+              <label className="label">Amount (LKR)</label>
               <input
                 type="number"
                 value={formData.amount}
@@ -266,7 +266,7 @@ export const RecurringTransactions: React.FC<RecurringTransactionsProps> = ({
 
                   <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <span className={`font-semibold text-base ${item.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {item.type === 'income' ? '+' : '-'}${item.amount.toFixed(2)}
+                      {item.type === 'income' ? '+' : '-'}LKR {item.amount.toFixed(2)}
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />

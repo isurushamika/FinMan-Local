@@ -69,3 +69,34 @@ export interface SearchFilters {
   dateFrom?: string;
   dateTo?: string;
 }
+
+export interface Item {
+  id: string;
+  name: string;
+  category: string;
+  unit?: string; // e.g., "kg", "liters", "pieces"
+  description?: string;
+}
+
+export interface ItemPurchase {
+  id: string;
+  itemId: string;
+  itemName: string;
+  transactionId: string;
+  price: number;
+  quantity: number;
+  unit?: string;
+  purchaseDate: string;
+  store?: string;
+  notes?: string;
+}
+
+export interface PriceHistory {
+  itemId: string;
+  itemName: string;
+  purchases: ItemPurchase[];
+  averagePrice: number;
+  lowestPrice: number;
+  highestPrice: number;
+  priceChange: number; // Percentage change from first to last purchase
+}
