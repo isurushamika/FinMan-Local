@@ -177,6 +177,7 @@ DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD_ENCODED}@localhost:5432/${DB
 JWT_SECRET="${JWT_SECRET}"
 PORT=3000
 NODE_ENV=production
+CORS_ORIGIN=https://${DOMAIN_APP},http://localhost:5173
 EOF
 print_status ".env file created"
 
