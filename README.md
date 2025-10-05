@@ -1,109 +1,215 @@
-# FinMan - Financial Management Application
+# FinMan - Personal Finance Manager# FinMan - Financial Management Application
 
-> **Complete Mobile + Web Financial Manager with Advanced Security**
 
-## 📱 Project Overview
 
-FinMan is a full-stack financial management application with:
+A full-stack personal finance management application with offline-first architecture, biometric authentication, and real-time sync.> **Complete Mobile + Web Financial Manager with Advanced Security**
+
+
+
+---## 📱 Project Overview
+
+
+
+## 🚀 Quick StartFinMan is a full-stack financial management application with:
+
 - **Native Android App** (Capacitor)
-- **Progressive Web App** (PWA)
-- **REST API Backend** (Node.js + Prisma)
-- **Ubuntu Server Deployment** ready
+
+### Your URLs- **Progressive Web App** (PWA)
+
+- **Backend API**: https://api.gearsandai.me ✅ Live- **REST API Backend** (Node.js + Prisma)
+
+- **Web App**: https://app.gearsandai.me (ready to deploy)- **Ubuntu Server Deployment** ready
+
+- **GitHub**: https://github.com/isurushamika/FinMan
 
 ## 🚀 Quick Start
 
-### Development
+### Android APK
 
-```powershell
+- **Location**: `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`### Development
+
+- **Size**: 5.28 MB
+
+- **Install**: Transfer to phone and install```powershell
+
 # Install dependencies
-cd apps/finman/frontend
+
+---cd apps/finman/frontend
+
 npm install
 
-cd ../backend
-npm install
+## 📱 Installation
 
-# Run development servers
-npm run dev  # Frontend on http://localhost:5173
-npm run dev  # Backend on http://localhost:3001
+cd ../backend
+
+### Android Appnpm install
+
+1. Transfer APK to your phone
+
+2. Enable "Install from Unknown Sources"# Run development servers
+
+3. Install and open appnpm run dev  # Frontend on http://localhost:5173
+
+4. Create account or loginnpm run dev  # Backend on http://localhost:3001
+
 ```
 
-### Production Build
+### Web App
 
-```powershell
-# Build frontend
+```bash### Production Build
+
+.\deployment\deploy-frontend.bat
+
+# See docs/DEPLOY.md for details```powershell
+
+```# Build frontend
+
 cd apps/finman/frontend
-npm run build
 
-# Build backend
+---npm run build
+
+
+
+## 🛠️ Development# Build backend
+
 cd ../backend
-npm run build
 
-# Build Android APK
-cd ../frontend/android
-.\gradlew assembleDebug
-```
+### Run Locallynpm run build
 
-**APK Location:** `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+```bash
 
-## ✨ Features
+# Backend# Build Android APK
 
-### Core Financial Features
+cd apps/finman/backendcd ../frontend/android
+
+npm install.\gradlew assembleDebug
+
+npm run dev```
+
+
+
+# Frontend**APK Location:** `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+
+cd apps/finman/frontend
+
+npm install## ✨ Features
+
+npm run dev
+
+```### Core Financial Features
+
 - ✅ **Transaction Tracking** - Income/expense management with categories
-- ✅ **Budget Management** - Monthly/yearly budgets with progress tracking
-- ✅ **Recurring Transactions** - Automated bill and payment tracking
-- ✅ **Item Tracker** - Track purchases and item history
-- ✅ **Charts & Analytics** - Visual spending insights
 
-### Smart Notifications 🔔
-- ✅ **Bill Reminders** - Get notified before recurring bills are due
-- ✅ **Budget Alerts** - Alerts at 80%, 90%, 100% of budget
+### Build Android- ✅ **Budget Management** - Monthly/yearly budgets with progress tracking
+
+```bash- ✅ **Recurring Transactions** - Automated bill and payment tracking
+
+cd apps/finman/frontend- ✅ **Item Tracker** - Track purchases and item history
+
+npm run build- ✅ **Charts & Analytics** - Visual spending insights
+
+npx cap sync
+
+cd android### Smart Notifications 🔔
+
+.\gradlew assembleDebug- ✅ **Bill Reminders** - Get notified before recurring bills are due
+
+```- ✅ **Budget Alerts** - Alerts at 80%, 90%, 100% of budget
+
 - ✅ **Spending Summaries** - Daily/weekly spending reports
-- ✅ **Configurable Settings** - Custom thresholds and schedules
 
-### Security 🔒
+---- ✅ **Configurable Settings** - Custom thresholds and schedules
+
+
+
+## 🔄 Update VPS### Security 🔒
+
 - ✅ **Biometric Authentication** - Fingerprint/Face ID
-- ✅ **PIN/Password Protection** - Secure app access
-- ✅ **Data Encryption** - AES-256-GCM encryption
-- ✅ **Auto-Lock** - Configurable inactivity timeout
-- ✅ **Session Management** - Secure session handling
 
-### Data Management
-- ✅ **Export/Import** - JSON data backup/restore
-- ✅ **Search & Filter** - Advanced transaction search
+```bash- ✅ **PIN/Password Protection** - Secure app access
+
+ssh root@198.23.228.126- ✅ **Data Encryption** - AES-256-GCM encryption
+
+cd ~/FinMan- ✅ **Auto-Lock** - Configurable inactivity timeout
+
+git pull origin main- ✅ **Session Management** - Secure session handling
+
+cd apps/finman/backend
+
+npm install### Data Management
+
+pm2 restart finman-api- ✅ **Export/Import** - JSON data backup/restore
+
+```- ✅ **Search & Filter** - Advanced transaction search
+
 - ✅ **Offline Support** - Full offline functionality
-- ✅ **Cloud Sync Ready** - API backend for multi-device sync
 
-## 📁 Project Structure
+---- ✅ **Cloud Sync Ready** - API backend for multi-device sync
 
-```
-financial/
-├── apps/
+
+
+## 📚 Documentation## 📁 Project Structure
+
+
+
+- **[docs/DEPLOY.md](./docs/DEPLOY.md)** - Deployment guide (VPS + Web)```
+
+- **[docs/API.md](./docs/API.md)** - API documentation  financial/
+
+- **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** - Development guide├── apps/
+
 │   └── finman/
-│       ├── frontend/              # React + Vite + Capacitor
+
+---│       ├── frontend/              # React + Vite + Capacitor
+
 │       │   ├── src/
-│       │   │   ├── components/   # UI components
+
+## ✨ Features│       │   │   ├── components/   # UI components
+
 │       │   │   ├── utils/        # Utilities (storage, auth, crypto)
-│       │   │   ├── types/        # TypeScript types
-│       │   │   └── App.tsx       # Main application
-│       │   ├── android/          # Android project
-│       │   ├── public/           # Static assets
-│       │   └── dist/             # Production build
-│       │
-│       └── backend/              # Node.js + Express + Prisma
-│           ├── src/
-│           │   ├── controllers/  # API controllers
+
+- Transaction management│       │   │   ├── types/        # TypeScript types
+
+- Budget tracking│       │   │   └── App.tsx       # Main application
+
+- Recurring transactions│       │   ├── android/          # Android project
+
+- Item tracking│       │   ├── public/           # Static assets
+
+- Charts & summaries│       │   └── dist/             # Production build
+
+- Offline sync│       │
+
+- Biometric auth│       └── backend/              # Node.js + Express + Prisma
+
+- Data export/import│           ├── src/
+
+- Dark mode│           │   ├── controllers/  # API controllers
+
 │           │   ├── services/     # Business logic
-│           │   ├── routes/       # API routes
+
+---│           │   ├── routes/       # API routes
+
 │           │   ├── middleware/   # Auth, error handling
-│           │   └── server.ts     # Main server
+
+## 🔐 Tech Stack│           │   └── server.ts     # Main server
+
 │           └── prisma/           # Database schema
-│
-├── deployment/                   # Nginx & PM2 configs
-└── docs/                         # Documentation
 
-```
+**Backend**: Node.js, PostgreSQL, Prisma, JWT  │
 
-## 🛠️ Technology Stack
+**Frontend**: React, TypeScript, Capacitor  ├── deployment/                   # Nginx & PM2 configs
+
+**Infrastructure**: VPS, Nginx, SSL, PM2└── docs/                         # Documentation
+
+
+
+---```
+
+
+
+*Last Updated: October 5, 2025*## 🛠️ Technology Stack
+
 
 ### Frontend
 - **Framework:** React 18 + TypeScript
