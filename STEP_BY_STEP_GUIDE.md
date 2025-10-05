@@ -219,6 +219,16 @@ git clone git@github.com:yourusername/FinMan.git
 # Should already be in FinMan directory
 cd ~/FinMan
 
+# IMPORTANT: Pull latest changes first!
+git pull origin main
+
+# Verify you're in the right place
+pwd
+# Should show: /home/finman/FinMan
+
+ls -la deployment/
+# Should show: deploy-vps.sh, update-vps.sh, etc.
+
 # Make deployment script executable
 chmod +x deployment/deploy-vps.sh
 
@@ -749,20 +759,43 @@ android\app\build\outputs\apk\release\app-release.apk
 ```
 ERROR: syntax error at or near "!"
 ERROR: CREATE DATABASE cannot be executed from a function
+ERROR: database "finman_db" does not exist
 ```
 
 **Solution:**
 ```bash
-# The password contains problematic characters for PostgreSQL
-# Avoid using these characters: ' (single quote), ! (exclamation)
-# Use safe characters: A-Z, a-z, 0-9, @, #, $, %, &, *, -, _
+# 1. FIRST: Pull the latest fixed deployment script
+cd ~/FinMan
+git pull origin main
 
-# If script already failed, clean up and restart:
+# 2. Clean up the failed database attempt
 sudo -u postgres psql -c "DROP DATABASE IF EXISTS finman_db;"
 sudo -u postgres psql -c "DROP USER IF EXISTS finman_admin;"
 
-# Then run the deployment script again with a safe password
+# 3. Verify you're in the correct directory
+pwd
+# Should show: /home/finman/FinMan
+
+# 4. Run the updated deployment script
 ./deployment/deploy-vps.sh
+
+# 5. When prompted for password, use safe characters only
+# ✓ Safe: A-Z, a-z, 0-9, @, #, $, %, &, *, -, _
+# ✗ Avoid: ' (single quote) ! (exclamation)
+```
+
+**Alternative: Manual Database Setup (if script keeps failing)**
+```bash
+# Create database and user manually
+sudo -u postgres createdb finman_production
+sudo -u postgres psql -c "CREATE USER finman_user WITH ENCRYPTED PASSWORD 'YourPassword123';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE finman_production TO finman_user;"
+sudo -u postgres psql -d finman_production -c "GRANT ALL ON SCHEMA public TO finman_user;"
+
+# Then continue with manual backend setup
+cd ~/FinMan/apps/finman/backend
+npm install --production
+# Create .env file manually (see VPS_DEPLOYMENT_GUIDE.md)
 ```
 
 ### Issue: SSH Connection Refused
