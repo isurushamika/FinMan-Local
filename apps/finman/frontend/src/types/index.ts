@@ -161,3 +161,15 @@ export interface NotificationPreferences extends NotificationSettings {
   vibrationEnabled: boolean;
   showBadge: boolean;
 }
+
+export interface Subscription {
+  id: string;
+  name: string;
+  amount: number;
+  billingCycle: 'monthly' | 'yearly' | 'weekly' | 'quarterly';
+  nextBillingDate: string;
+  category: string;
+  description?: string;
+  isActive: boolean;
+  autoRenew: boolean;
+}

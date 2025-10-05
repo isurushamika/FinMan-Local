@@ -22,12 +22,11 @@ import { RecurringTransactions } from './components/RecurringTransactions';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
-import SecuritySettings from './components/SecuritySettings';
+import SettingsComponent from './components/Settings';
 import Notifications from './components/Notifications';
-import NotificationSettingsComponent from './components/NotificationSettings';
 import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
 import { useAuth } from './contexts/AuthContext';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Shield, Bell, Settings, LogOut, User } from 'lucide-react';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -38,8 +37,9 @@ function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [purchases, setPurchases] = useState<ItemPurchase[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'security' | 'notifications' | 'notification-settings' | 'data'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'subscriptions' | 'settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Load initial data from API
   useEffect(() => {
@@ -105,10 +105,10 @@ function App() {
 
   // Update unread count when active tab changes to notifications
   useEffect(() => {
-    if (activeTab === 'notifications' || activeTab === 'notification-settings') {
+    if (showNotifications) {
       setUnreadNotifications(getUnreadCount());
     }
-  }, [activeTab]);
+  }, [showNotifications]);
 
   // Calculate budget progress helper
   const calculateBudgetProgress = (): BudgetProgress[] => {
@@ -358,6 +358,20 @@ function App() {
                 <User className="w-4 h-4" />
                 <span>{user?.name || user?.email}</span>
               </div>
+              
+              {/* Notification Bell */}
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadNotifications}
+                  </span>
+                )}
+              </button>
+              
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -369,6 +383,34 @@ function App() {
           </div>
         </div>
       </header>
+
+      {/* Notification Popup Panel */}
+      {showNotifications && (
+        <div className="fixed top-[72px] right-4 w-96 max-h-[80vh] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <Notifications />
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close notification panel */}
+      {showNotifications && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowNotifications(false)}
+        />
+      )}
 
       {/* Navigation Tabs */}
       <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-[72px] z-10 overflow-x-auto">
@@ -460,49 +502,30 @@ function App() {
             {/* Divider */}
             <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
 
-            {/* Notifications */}
+            {/* Subscriptions */}
             <button
-              onClick={() => setActiveTab('notifications')}
-              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 relative ${
-                activeTab === 'notifications'
+              onClick={() => setActiveTab('subscriptions')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
+                activeTab === 'subscriptions'
                   ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              <Bell className="w-4 h-4" />
-              <span className="hidden sm:inline">Notifications</span>
-              {unreadNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </span>
-              )}
+              <Package className="w-4 h-4" />
+              <span className="hidden sm:inline">Subscriptions</span>
             </button>
 
-            {/* Notification Settings */}
+            {/* Settings (Security + Notifications) */}
             <button
-              onClick={() => setActiveTab('notification-settings')}
+              onClick={() => setActiveTab('settings')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
-                activeTab === 'notification-settings'
+                activeTab === 'settings'
                   ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
               }`}
-              title="Notification Settings"
             >
               <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Notif. Settings</span>
-            </button>
-
-            {/* Security */}
-            <button
-              onClick={() => setActiveTab('security')}
-              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
-                activeTab === 'security'
-                  ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Security</span>
+              <span className="hidden sm:inline">Settings</span>
             </button>
 
             {/* Data Management */}
@@ -594,11 +617,17 @@ function App() {
           />
         )}
 
-        {activeTab === 'notifications' && <Notifications />}
+        {activeTab === 'settings' && <SettingsComponent />}
 
-        {activeTab === 'notification-settings' && <NotificationSettingsComponent />}
-
-        {activeTab === 'security' && <SecuritySettings />}
+        {activeTab === 'subscriptions' && (
+          <div className="card">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Subscriptions</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Subscription tracking feature coming soon! This will allow you to track recurring subscriptions
+              with different billing cycles (monthly, yearly, weekly, quarterly).
+            </p>
+          </div>
+        )}
 
         {activeTab === 'data' && (
           <DataManagement
