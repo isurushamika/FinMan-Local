@@ -1,365 +1,316 @@
-# Multi-App Server Structure
+# FinMan - Financial Management Application
 
-This project is structured to support hosting multiple applications on a single Ubuntu server.
+> **Complete Mobile + Web Financial Manager with Advanced Security**
+
+## 📱 Project Overview
+
+FinMan is a full-stack financial management application with:
+- **Native Android App** (Capacitor)
+- **Progressive Web App** (PWA)
+- **REST API Backend** (Node.js + Prisma)
+- **Ubuntu Server Deployment** ready
+
+## 🚀 Quick Start
+
+### Development
+
+```powershell
+# Install dependencies
+cd apps/finman/frontend
+npm install
+
+cd ../backend
+npm install
+
+# Run development servers
+npm run dev  # Frontend on http://localhost:5173
+npm run dev  # Backend on http://localhost:3001
+```
+
+### Production Build
+
+```powershell
+# Build frontend
+cd apps/finman/frontend
+npm run build
+
+# Build backend
+cd ../backend
+npm run build
+
+# Build Android APK
+cd ../frontend/android
+.\gradlew assembleDebug
+```
+
+**APK Location:** `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+
+## ✨ Features
+
+### Core Financial Features
+- ✅ **Transaction Tracking** - Income/expense management with categories
+- ✅ **Budget Management** - Monthly/yearly budgets with progress tracking
+- ✅ **Recurring Transactions** - Automated bill and payment tracking
+- ✅ **Item Tracker** - Track purchases and item history
+- ✅ **Charts & Analytics** - Visual spending insights
+
+### Smart Notifications 🔔
+- ✅ **Bill Reminders** - Get notified before recurring bills are due
+- ✅ **Budget Alerts** - Alerts at 80%, 90%, 100% of budget
+- ✅ **Spending Summaries** - Daily/weekly spending reports
+- ✅ **Configurable Settings** - Custom thresholds and schedules
+
+### Security 🔒
+- ✅ **Biometric Authentication** - Fingerprint/Face ID
+- ✅ **PIN/Password Protection** - Secure app access
+- ✅ **Data Encryption** - AES-256-GCM encryption
+- ✅ **Auto-Lock** - Configurable inactivity timeout
+- ✅ **Session Management** - Secure session handling
+
+### Data Management
+- ✅ **Export/Import** - JSON data backup/restore
+- ✅ **Search & Filter** - Advanced transaction search
+- ✅ **Offline Support** - Full offline functionality
+- ✅ **Cloud Sync Ready** - API backend for multi-device sync
 
 ## 📁 Project Structure
 
 ```
-financial/                          # Root project directory
-├── apps/                           # All applications
-│   ├── finman/                     # Financial Manager App
-│   │   ├── frontend/               # React frontend
-│   │   │   ├── src/
-│   │   │   ├── public/
-│   │   │   ├── package.json
-│   │   │   └── vite.config.ts
-│   │   ├── backend/                # Node.js API
-│   │   │   ├── src/
-│   │   │   ├── prisma/
-│   │   │   ├── package.json
-│   │   │   └── .env
-│   │   └── README.md
-│   │
-│   └── [future-apps]/              # Add more apps here
+financial/
+├── apps/
+│   └── finman/
+│       ├── frontend/              # React + Vite + Capacitor
+│       │   ├── src/
+│       │   │   ├── components/   # UI components
+│       │   │   ├── utils/        # Utilities (storage, auth, crypto)
+│       │   │   ├── types/        # TypeScript types
+│       │   │   └── App.tsx       # Main application
+│       │   ├── android/          # Android project
+│       │   ├── public/           # Static assets
+│       │   └── dist/             # Production build
+│       │
+│       └── backend/              # Node.js + Express + Prisma
+│           ├── src/
+│           │   ├── controllers/  # API controllers
+│           │   ├── services/     # Business logic
+│           │   ├── routes/       # API routes
+│           │   ├── middleware/   # Auth, error handling
+│           │   └── server.ts     # Main server
+│           └── prisma/           # Database schema
 │
-├── deployment/                     # Deployment configurations
-│   ├── nginx/                      # Nginx configs
-│   │   ├── finman-subdomain.conf
-│   │   └── main-site-pathbased.conf
-│   ├── pm2/                        # PM2 configs (if needed)
-│   ├── deploy.sh                   # Linux deploy script
-│   └── deploy.bat                  # Windows deploy script
-│
-├── ecosystem.config.js             # PM2 multi-app manager
-└── README.md                       # This file
+├── deployment/                   # Nginx & PM2 configs
+└── docs/                         # Documentation
+
 ```
 
-## 🚀 Development Workflow
+## 🛠️ Technology Stack
 
-### Start FinMan Locally
+### Frontend
+- **Framework:** React 18 + TypeScript
+- **Build Tool:** Vite
+- **Mobile:** Capacitor 7.x
+- **Styling:** Tailwind CSS
+- **Charts:** Chart.js + react-chartjs-2
+- **Icons:** Lucide React
+- **Date Handling:** date-fns
 
-**Frontend:**
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** JWT + bcrypt
+- **File Upload:** Multer
+
+### Security
+- **Encryption:** Web Crypto API (AES-256-GCM)
+- **Biometric:** Capacitor Native Biometric
+- **Storage:** Encrypted localStorage
+
+## 📝 Build Requirements
+
+### For Web App
+- Node.js 18+
+- npm or yarn
+
+### For Android APK
+- **Java Development Kit:** JDK 21 (required)
+  - Download: https://adoptium.net/temurin/releases/?version=21
+  - Set `JAVA_HOME` or configure in `android/gradle.properties`
+- **Android SDK:** Installed (command-line tools sufficient)
+- **Gradle:** 8.11+ (included in project)
+
+**Note:** Android Studio is **not** required for building APKs. Use `gradlew` command-line tool.
+
+## 🔧 Configuration Files
+
+### Frontend Configuration
+- `package.json` - Dependencies and scripts
+- `vite.config.ts` - Vite build configuration
+- `capacitor.config.ts` - Capacitor/Android settings
+- `tailwind.config.js` - Tailwind CSS configuration
+- `tsconfig.json` - TypeScript configuration
+
+### Android Configuration
+- `android/build.gradle` - Android Gradle Plugin 8.7.2
+- `android/gradle.properties` - Java 21 path, JVM settings
+- `android/app/build.gradle` - App-specific build settings
+- `android/variables.gradle` - Android SDK versions
+
+### Backend Configuration
+- `package.json` - Dependencies and scripts
+- `tsconfig.json` - TypeScript configuration
+- `prisma/schema.prisma` - Database schema
+
+## 🌐 Deployment
+
+### Ubuntu Server Deployment
+
+Complete deployment guide: [UBUNTU_DEPLOYMENT.md](UBUNTU_DEPLOYMENT.md)
+
+**Quick Deploy:**
 ```bash
+cd deployment
+chmod +x finman-deploy.sh
+./finman-deploy.sh
+```
+
+**Services:**
+- Frontend: http://yourdomain.com/finman (or subdomain)
+- Backend: http://yourdomain.com/api/finman
+- PM2 process management for backend
+
+### Android APK Distribution
+
+1. **Build Release APK:**
+   ```powershell
+   cd apps/finman/frontend/android
+   .\gradlew assembleRelease
+   ```
+
+2. **Sign APK** (for production):
+   - Generate keystore
+   - Configure signing in `android/app/build.gradle`
+   - Build signed APK
+
+3. **Distribute:**
+   - Direct APK distribution
+   - Google Play Store (with signed release)
+   - Enterprise app stores
+
+## 📖 Additional Documentation
+
+- **[CAPACITOR_BUILD_GUIDE.md](CAPACITOR_BUILD_GUIDE.md)** - Complete Capacitor setup
+- **[JAVA17_SETUP.md](apps/finman/frontend/JAVA17_SETUP.md)** - Java 21 installation guide
+- **[UBUNTU_DEPLOYMENT.md](UBUNTU_DEPLOYMENT.md)** - Server deployment guide
+- **[SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)** - Security features
+- **[API.md](apps/finman/backend/docs/API.md)** - Backend API documentation
+
+## 🧹 Maintenance
+
+### Clean Build Artifacts
+```powershell
+.\cleanup.bat
+```
+
+Removes:
+- Frontend/backend build directories
+- Android build artifacts
+- Gradle cache
+- Temporary files
+
+### Update Dependencies
+```powershell
+# Frontend
 cd apps/finman/frontend
-npm install
-npm run dev
-# Runs on http://localhost:5173
-```
+npm update
 
-**Backend:**
-```bash
-cd apps/finman/backend
-npm install
-npx prisma migrate dev
-npm run dev
-# Runs on http://localhost:3000
-```
-
-### Adding a New App
-
-1. Create app structure:
-```bash
-mkdir -p apps/newapp/{frontend,backend}
-```
-
-2. Setup frontend (React/Vue/etc):
-```bash
-cd apps/newapp/frontend
-npm create vite@latest . -- --template react-ts
-npm install
-```
-
-3. Setup backend:
-```bash
-cd apps/newapp/backend
-npm init -y
-# Install your backend dependencies
-```
-
-4. Add to `ecosystem.config.js`:
-```javascript
-{
-  name: 'newapp-api',
-  script: './apps/newapp/backend/dist/server.js',
-  env_production: {
-    PORT: 3001  // Use different port
-  }
-}
-```
-
-5. Create nginx config in `deployment/nginx/newapp.conf`
-
-## 📦 Production Deployment
-
-### Initial Server Setup
-
-1. **Clone repository:**
-```bash
-cd /var/www
-git clone your-repo-url apps
-cd apps
-```
-
-2. **Setup each app:**
-```bash
-# FinMan
-cd apps/finman/frontend
-npm install && npm run build
-
+# Backend
 cd ../backend
-npm install && npm run build
-npx prisma migrate deploy
+npm update
 ```
 
-3. **Configure PM2:**
-```bash
-# From project root
-pm2 start ecosystem.config.js --env production
-pm2 save
-pm2 startup
+## 🐛 Troubleshooting
+
+### Build Issues
+
+**TypeScript Errors:**
+```powershell
+npm run build 2>&1 | Select-String "error"
 ```
 
-4. **Setup Nginx:**
+**Android Build Fails:**
+- Verify Java 21 is installed: `java -version`
+- Check Gradle daemon: `.\gradlew --version`
+- Clean build: `.\gradlew clean`
 
-**Option A - Subdomain (Recommended):**
-```bash
-sudo cp deployment/nginx/finman-subdomain.conf /etc/nginx/sites-available/finman
-sudo ln -s /etc/nginx/sites-available/finman /etc/nginx/sites-enabled/
-```
+**Biometric Not Working:**
+- Test on physical device (not emulator)
+- Check Android permissions
+- Verify device has biometric hardware
 
-Update the file:
-- Replace `finman.yourdomain.com` with your actual domain
-- Update paths if needed
+### Common Solutions
 
-**Option B - Path-based:**
-```bash
-sudo cp deployment/nginx/main-site-pathbased.conf /etc/nginx/sites-available/main
-sudo ln -s /etc/nginx/sites-available/main /etc/nginx/sites-enabled/
-```
+1. **"Java 17/21 required" error:**
+   - Install correct JDK version
+   - Update `android/gradle.properties`
 
-5. **SSL Setup:**
-```bash
-sudo certbot --nginx -d finman.yourdomain.com
-# Or for multiple apps:
-sudo certbot --nginx -d yourdomain.com -d finman.yourdomain.com -d app2.yourdomain.com
-```
+2. **"Module not found" errors:**
+   - Delete `node_modules`
+   - Run `npm install`
 
-6. **Start services:**
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
-pm2 restart all
-```
+3. **Capacitor sync issues:**
+   - Run `npx cap sync android`
+   - Rebuild Android project
 
-### Quick Deploy Script
+## 📊 Performance
 
-```bash
-# Deploy specific app
-./deployment/deploy.sh finman
+### Bundle Sizes (Production)
+- **Frontend:**
+  - HTML: 0.49 KB
+  - CSS: 24.88 KB (gzipped: 4.98 KB)
+  - JavaScript: 405.92 KB (gzipped: 128.80 KB)
+  
+- **Android APK:**
+  - Debug: ~5.3 MB
+  - Release (minified): ~4.5 MB
 
-# Or deploy all apps
-for app in apps/*/; do
-    app_name=$(basename "$app")
-    ./deployment/deploy.sh "$app_name"
-done
-```
+### Optimization
+- ✅ Code splitting with Vite
+- ✅ Tree shaking enabled
+- ✅ Gzip compression
+- ✅ Lazy loading for components
+- ✅ Development-only console logs
+- ✅ Encrypted local storage
 
-## 🌐 URL Structure
+## 🔐 Security Best Practices
 
-### Subdomain Approach (Recommended)
-- `finman.yourdomain.com` → FinMan app
-- `finman.yourdomain.com/api` → FinMan API
-- `app2.yourdomain.com` → Another app
-- `app2.yourdomain.com/api` → App2 API
+1. **Change default encryption key** in production
+2. **Use HTTPS** for backend API
+3. **Enable biometric auth** for sensitive operations
+4. **Set auto-lock timeout** appropriately
+5. **Regular data backups** via export feature
+6. **Keep dependencies updated** for security patches
 
-**Pros:**
-- Clean URLs
-- Isolated apps
-- Easy SSL per app
-- Independent deployments
+## 📄 License
 
-### Path-based Approach
-- `yourdomain.com/finman` → FinMan app
-- `yourdomain.com/finman/api` → FinMan API
-- `yourdomain.com/app2` → Another app
+Private project - All rights reserved
 
-**Pros:**
-- Single domain
-- One SSL certificate
-- Good for related apps
+## 👤 Author
 
-## 🗄️ Database Strategy
+**Isuru Shamika**
+- GitHub: [@isurushamika](https://github.com/isurushamika)
 
-### Option 1: Separate Databases (Recommended)
-```sql
--- Each app has its own database
-CREATE DATABASE finman_db;
-CREATE DATABASE app2_db;
-CREATE DATABASE app3_db;
+## 🙏 Acknowledgments
 
--- Each with own user
-CREATE USER finman_user WITH PASSWORD 'password';
-GRANT ALL PRIVILEGES ON DATABASE finman_db TO finman_user;
-```
-
-**Pros:**
-- Complete isolation
-- Easy backups per app
-- Independent migrations
-- Security boundaries
-
-### Option 2: Shared Database, Different Schemas
-```sql
--- One database, multiple schemas
-CREATE DATABASE apps_db;
-CREATE SCHEMA finman;
-CREATE SCHEMA app2;
-```
-
-## 📊 PM2 Management
-
-```bash
-# Start all apps
-pm2 start ecosystem.config.js
-
-# Start specific app
-pm2 start ecosystem.config.js --only finman-api
-
-# View status
-pm2 status
-
-# View logs
-pm2 logs finman-api
-pm2 logs --lines 100
-
-# Restart app
-pm2 restart finman-api
-
-# Stop app
-pm2 stop finman-api
-
-# Delete app
-pm2 delete finman-api
-
-# Monitor
-pm2 monit
-```
-
-## 📁 File Organization on Server
-
-```
-/var/www/apps/
-├── finman/
-│   ├── frontend/dist/          # Built frontend
-│   ├── backend/
-│   │   ├── dist/               # Built backend
-│   │   ├── uploads/            # User uploads
-│   │   └── node_modules/
-│   └── .env
-│
-├── app2/
-│   └── ...
-│
-└── logs/                       # PM2 logs
-    ├── finman-api-error.log
-    ├── finman-api-out.log
-    └── ...
-```
-
-## 🔐 Environment Variables
-
-Each app has its own `.env` file:
-
-```
-apps/finman/backend/.env
-apps/app2/backend/.env
-```
-
-Keep secrets separate per app!
-
-## 🚦 Port Allocation
-
-Assign different ports to each backend:
-
-- **FinMan API**: 3000
-- **App2 API**: 3001
-- **App3 API**: 3002
-- etc.
-
-Configure in `ecosystem.config.js` and app `.env` files.
-
-## 📝 Best Practices
-
-1. **Version Control**: Each app can have its own git repo or use monorepo
-2. **Dependencies**: Keep app dependencies isolated
-3. **Logging**: Use PM2 logs, store in `/var/log/` or app-specific locations
-4. **Backups**: Backup each database separately
-5. **SSL**: Use Let's Encrypt, renews automatically
-6. **Monitoring**: Use PM2 monitoring or external tools
-7. **Updates**: Deploy apps independently
-
-## 🔄 CI/CD Integration
-
-Example GitHub Actions for auto-deploy:
-
-```yaml
-name: Deploy FinMan
-on:
-  push:
-    branches: [main]
-    paths: ['apps/finman/**']
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Deploy to server
-        run: |
-          ssh user@server 'cd /var/www/apps && ./deployment/deploy.sh finman'
-```
-
-## 📚 Additional Documentation
-
-- **FinMan Specific**: See `apps/finman/README.md`
-- **API Documentation**: `apps/finman/backend/docs/API.md`
-- **Deployment Guide**: `apps/finman/DEPLOYMENT_GUIDE.md`
-- **Migration Guide**: `apps/finman/MIGRATION_GUIDE.md`
-
-## 🆘 Troubleshooting
-
-**App not starting:**
-```bash
-pm2 logs finman-api --err
-```
-
-**Nginx issues:**
-```bash
-sudo nginx -t
-sudo tail -f /var/log/nginx/error.log
-```
-
-**Database connection:**
-```bash
-sudo -u postgres psql
-\l  # List databases
-\c finman_db  # Connect to database
-```
-
-**Port conflicts:**
-```bash
-sudo lsof -i :3000
-# Kill process using the port
-```
-
-## 🎯 Next Steps
-
-1. ✅ Structure created
-2. ✅ Deployment configs ready
-3. ⏭️ Deploy to Ubuntu server
-4. ⏭️ Add more apps as needed
-5. ⏭️ Setup monitoring and backups
+- React Team
+- Capacitor Team
+- Tailwind CSS
+- Chart.js
+- All open-source contributors
 
 ---
 
-**Ready to host unlimited apps on your Ubuntu server!** 🚀
+**Version:** 1.0.0  
+**Last Updated:** October 2025  
+**Status:** Production Ready ✅

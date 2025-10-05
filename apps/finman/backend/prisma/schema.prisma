@@ -21,6 +21,8 @@ model User {
   transactions Transaction[]
   budgets      Budget[]
   recurring    RecurringTransaction[]
+  items        Item[]
+  purchases    ItemPurchase[]
 
   @@map("users")
 }
@@ -82,4 +84,44 @@ model RecurringTransaction {
   @@index([userId, isActive])
   @@index([userId, nextDate])
   @@map("recurring_transactions")
+}
+
+model Item {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  category    String
+  quantity    Int            @default(0)
+  unitPrice   Float
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  purchases   ItemPurchase[]
+
+  @@index([userId])
+  @@index([userId, category])
+  @@map("items")
+}
+
+model ItemPurchase {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId       String
+  item         Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  quantity     Int
+  unitPrice    Float
+  totalCost    Float
+  purchaseDate String
+  store        String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([itemId])
+  @@index([userId, purchaseDate])
+  @@map("item_purchases")
 }

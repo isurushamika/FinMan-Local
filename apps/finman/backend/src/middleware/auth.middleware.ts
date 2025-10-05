@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
   userId?: string;
+  user?: {
+    id: string;
+    email: string;
+  };
 }
 
 export const authMiddleware = async (
@@ -25,8 +29,9 @@ export const authMiddleware = async (
       throw new Error('JWT_SECRET is not defined');
     }
 
-    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string; email: string };
     req.userId = decoded.userId;
+    req.user = { id: decoded.userId, email: decoded.email };
 
     next();
   } catch (error) {
@@ -39,3 +44,6 @@ export const authMiddleware = async (
     }
   }
 };
+
+// Alias for consistency
+export const authenticateToken = authMiddleware;

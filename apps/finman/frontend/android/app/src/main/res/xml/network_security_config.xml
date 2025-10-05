@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext (HTTP) traffic for development -->
+    <!-- This allows the app to connect to local development servers -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- For production, you should use HTTPS only -->
+    <!-- Uncomment below and comment above for production builds -->
+    <!--
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    -->
+    
+    <!-- Allow specific domains for development -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">192.168.1.199</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- Android emulator -->
+    </domain-config>
+</network-security-config>

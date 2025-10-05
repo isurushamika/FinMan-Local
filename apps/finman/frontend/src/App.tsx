@@ -1,6 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase } from './types';
+import { useState, useEffect, useCallback } from 'react';
+import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, AuthState, BudgetProgress } from './types';
 import { loadTransactions, saveTransactions, loadBudgets, saveBudgets, loadRecurring, saveRecurring, loadItems, saveItems, loadPurchases, savePurchases } from './utils/storage';
+import { loadAuthState, saveAuthState, clearAuthState, userExists, getAutoLockTimeout, validateSession } from './utils/auth';
+import { 
+  loadNotificationSettings, 
+  checkUpcomingBills, 
+  checkBudgetAlerts,
+  addNotifications,
+  getUnreadCount
+} from './utils/notifications';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import SummaryCards from './components/SummaryCards';
@@ -10,7 +18,11 @@ import { RecurringTransactions } from './components/RecurringTransactions';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package } from 'lucide-react';
+import AuthScreen from './components/AuthScreen';
+import SecuritySettings from './components/SecuritySettings';
+import Notifications from './components/Notifications';
+import NotificationSettingsComponent from './components/NotificationSettings';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Shield, Bell, Settings } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -20,7 +32,99 @@ function App() {
   const [items, setItems] = useState<Item[]>([]);
   const [purchases, setPurchases] = useState<ItemPurchase[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'data'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'security' | 'notifications' | 'notification-settings' | 'data'>('dashboard');
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  
+  // Authentication state
+  const [authState, setAuthState] = useState<AuthState>({
+    isAuthenticated: false,
+    isLocked: true,
+    user: null,
+    lastActivity: Date.now(),
+  });
+
+  // Initialize authentication state on mount
+  useEffect(() => {
+    const initAuth = () => {
+      const savedAuthState = loadAuthState();
+      const hasUser = userExists();
+      const sessionValid = validateSession();
+
+      if (hasUser) {
+        if (savedAuthState && sessionValid) {
+          setAuthState(savedAuthState);
+        } else {
+          // Session expired or invalid, lock the app
+          setAuthState({
+            isAuthenticated: false,
+            isLocked: true,
+            user: savedAuthState?.user || null,
+            lastActivity: Date.now(),
+          });
+        }
+      } else {
+        // First time user, show setup
+        setAuthState({
+          isAuthenticated: false,
+          isLocked: true,
+          user: null,
+          lastActivity: Date.now(),
+        });
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  // Auto-lock based on inactivity
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.isLocked) return;
+
+    const timeout = getAutoLockTimeout();
+    if (timeout === 0) return; // Auto-lock disabled
+
+    const checkActivity = () => {
+      const timeSinceLastActivity = Date.now() - authState.lastActivity;
+      if (timeSinceLastActivity >= timeout) {
+        handleLock();
+      }
+    };
+
+    const interval = setInterval(checkActivity, 1000); // Check every second
+    return () => clearInterval(interval);
+  }, [authState.isAuthenticated, authState.isLocked, authState.lastActivity]);
+
+  // Update activity on user interaction
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.isLocked) return;
+
+    const updateActivity = () => {
+      setAuthState(prev => ({
+        ...prev,
+        lastActivity: Date.now(),
+      }));
+    };
+
+    // Listen to various user events
+    window.addEventListener('mousedown', updateActivity);
+    window.addEventListener('keydown', updateActivity);
+    window.addEventListener('touchstart', updateActivity);
+    window.addEventListener('scroll', updateActivity);
+
+    return () => {
+      window.removeEventListener('mousedown', updateActivity);
+      window.removeEventListener('keydown', updateActivity);
+      window.removeEventListener('touchstart', updateActivity);
+      window.removeEventListener('scroll', updateActivity);
+    };
+  }, [authState.isAuthenticated, authState.isLocked]);
+
+  // Save auth state when it changes
+  useEffect(() => {
+    if (authState.isAuthenticated) {
+      saveAuthState(authState);
+    }
+  }, [authState]);
 
   useEffect(() => {
     const loaded = loadTransactions();
@@ -38,7 +142,87 @@ function App() {
 
     const loadedPurchases = loadPurchases();
     setPurchases(loadedPurchases);
+
+    // Load unread notification count
+    setUnreadNotifications(getUnreadCount());
   }, []);
+
+  // Check notifications when data changes
+  useEffect(() => {
+    if (!authState.isAuthenticated) return;
+
+    const checkNotifications = () => {
+      const settings = loadNotificationSettings();
+      const newNotifications = [];
+
+      // Check upcoming bills
+      const billReminders = checkUpcomingBills(recurring, settings);
+      newNotifications.push(...billReminders);
+
+      // Check budget alerts (calculate budget progress first)
+      const budgetProgress = calculateBudgetProgress();
+      const budgetNotifications = checkBudgetAlerts(budgetProgress, settings);
+      newNotifications.push(...budgetNotifications);
+
+      // Add notifications if any
+      if (newNotifications.length > 0) {
+        addNotifications(newNotifications);
+        setUnreadNotifications(getUnreadCount());
+      }
+    };
+
+    checkNotifications();
+  }, [transactions, budgets, recurring, authState.isAuthenticated]);
+
+  // Update unread count when active tab changes to notifications
+  useEffect(() => {
+    if (activeTab === 'notifications' || activeTab === 'notification-settings') {
+      setUnreadNotifications(getUnreadCount());
+    }
+  }, [activeTab]);
+
+  // Calculate budget progress helper
+  const calculateBudgetProgress = (): BudgetProgress[] => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return budgets.map(budget => {
+      const spent = transactions
+        .filter(t => {
+          const tDate = new Date(t.date);
+          if (budget.period === 'monthly') {
+            return (
+              t.type === 'expense' &&
+              t.category === budget.category &&
+              tDate.getMonth() === currentMonth &&
+              tDate.getFullYear() === currentYear
+            );
+          } else {
+            return (
+              t.type === 'expense' &&
+              t.category === budget.category &&
+              tDate.getFullYear() === currentYear
+            );
+          }
+        })
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const remaining = budget.amount - spent;
+      const percentage = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+      const status: 'safe' | 'warning' | 'exceeded' = 
+        percentage >= 100 ? 'exceeded' : percentage >= 80 ? 'warning' : 'safe';
+
+      return {
+        category: budget.category,
+        budgeted: budget.amount,
+        spent,
+        remaining,
+        percentage,
+        status
+      };
+    });
+  };
 
   useEffect(() => {
     saveTransactions(transactions);
@@ -118,6 +302,36 @@ function App() {
     return () => clearInterval(interval);
   }, [recurring]);
 
+  // Authentication handlers
+  const handleAuthenticated = useCallback(() => {
+    const savedAuthState = loadAuthState();
+    setAuthState({
+      isAuthenticated: true,
+      isLocked: false,
+      user: savedAuthState?.user || null,
+      lastActivity: Date.now(),
+    });
+  }, []);
+
+  const handleLock = useCallback(() => {
+    setAuthState(prev => ({
+      ...prev,
+      isLocked: true,
+    }));
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    if (confirm('Are you sure you want to logout? Make sure you remember your password!')) {
+      clearAuthState();
+      setAuthState({
+        isAuthenticated: false,
+        isLocked: true,
+        user: null,
+        lastActivity: Date.now(),
+      });
+    }
+  }, []);
+
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
@@ -188,6 +402,11 @@ function App() {
     setRecurring([...recurring, ...data.recurring]);
   };
 
+  // Show auth screen if not authenticated or locked
+  if (!authState.isAuthenticated || authState.isLocked) {
+    return <AuthScreen onAuthenticated={handleAuthenticated} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -202,6 +421,12 @@ function App() {
                 FinMan
               </h1>
             </div>
+            <button
+              onClick={handleLogout}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              🔒 Lock
+            </button>
           </div>
         </div>
       </header>
@@ -296,7 +521,52 @@ function App() {
             {/* Divider */}
             <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
 
-            {/* Data Section */}
+            {/* Notifications */}
+            <button
+              onClick={() => setActiveTab('notifications')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 relative ${
+                activeTab === 'notifications'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Bell className="w-4 h-4" />
+              <span className="hidden sm:inline">Notifications</span>
+              {unreadNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </button>
+
+            {/* Notification Settings */}
+            <button
+              onClick={() => setActiveTab('notification-settings')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
+                activeTab === 'notification-settings'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title="Notification Settings"
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Notif. Settings</span>
+            </button>
+
+            {/* Security */}
+            <button
+              onClick={() => setActiveTab('security')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
+                activeTab === 'security'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              <span className="hidden sm:inline">Security</span>
+            </button>
+
+            {/* Data Management */}
             <button
               onClick={() => setActiveTab('data')}
               className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
@@ -384,6 +654,12 @@ function App() {
             onDeleteItem={handleDeleteItem}
           />
         )}
+
+        {activeTab === 'notifications' && <Notifications />}
+
+        {activeTab === 'notification-settings' && <NotificationSettingsComponent />}
+
+        {activeTab === 'security' && <SecuritySettings />}
 
         {activeTab === 'data' && (
           <DataManagement

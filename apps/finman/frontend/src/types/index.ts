@@ -100,3 +100,64 @@ export interface PriceHistory {
   highestPrice: number;
   priceChange: number; // Percentage change from first to last purchase
 }
+
+export interface User {
+  id: string;
+  username: string;
+  passwordHash: string;
+  salt: string;
+  createdAt: string;
+  lastLogin?: string;
+  securitySettings: SecuritySettings;
+}
+
+export interface SecuritySettings {
+  autoLockEnabled: boolean;
+  autoLockTimeout: number; // minutes
+  biometricEnabled: boolean;
+  encryptionEnabled: boolean;
+  requirePasswordOnStartup: boolean;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  isLocked: boolean;
+  user: User | null;
+  lastActivity: number;
+}
+
+export interface Notification {
+  id: string;
+  type: 'bill_reminder' | 'budget_alert' | 'spending_summary';
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high';
+  date: string;
+  read: boolean;
+  data?: any; // Additional data specific to notification type
+}
+
+export interface NotificationSettings {
+  billReminders: {
+    enabled: boolean;
+    daysBefore: number; // Days before bill due date
+    time: string; // HH:mm format (e.g., "09:00")
+  };
+  budgetAlerts: {
+    enabled: boolean;
+    thresholdPercentage: number; // Alert when spending reaches this % of budget (e.g., 80)
+    warningPercentage: number; // Warning when spending reaches this % (e.g., 90)
+  };
+  spendingSummary: {
+    enabled: boolean;
+    frequency: 'daily' | 'weekly';
+    time: string; // HH:mm format
+    dayOfWeek?: number; // 0-6 for weekly (0 = Sunday)
+  };
+}
+
+export interface NotificationPreferences extends NotificationSettings {
+  soundEnabled: boolean;
+  vibrationEnabled: boolean;
+  showBadge: boolean;
+}
