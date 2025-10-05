@@ -10,7 +10,7 @@ echo "================================"
 
 # Configuration
 VPS_USER="root"
-VPS_HOST="198.23.228.126"
+VPS_HOST="172.245.138.228"
 VPS_APP_DIR="/var/www/finman-app"
 LOCAL_BUILD_DIR="apps/finman/frontend/dist"
 NGINX_CONFIG="deployment/nginx/finman-app.conf"
