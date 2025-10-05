@@ -10,7 +10,12 @@
 This guide will walk you through:
 1. ✅ VPS preparation and setup
 2. ✅ Application deployment
-3. ✅ SSL certificate installation
+**5. Git Repository:**
+```
+Enter your repo URL: https://github.com/yourusername/FinMan
+```
+
+**Note:** The script will use the already-cloned repository in `~/FinMan` SSL certificate installation
 4. ✅ Android app production build
 5. ✅ Testing and verification
 
@@ -47,7 +52,21 @@ SSH Username: __________
 SSH Password/Key: __________
 Domain Name: ________________.com
 Database Password: __________________ (create a strong one!)
+GitHub Username: __________
 Git Repository URL: https://github.com/username/FinMan
+```
+
+**Important:** Make sure you've already pushed your code to GitHub:
+```powershell
+# On Windows, verify your code is on GitHub
+cd D:\Projects\Dev\financial
+git status
+# Should show: "nothing to commit, working tree clean"
+
+# If you have changes:
+git add .
+git commit -m "Ready for deployment"
+git push origin main
 ```
 
 ---
@@ -142,25 +161,52 @@ sudo ls -la /root
 exit
 ```
 
-### Step 1.5: Upload Deployment Script
+### Step 1.5: Install Git on VPS
 
-**From your Windows machine:**
+```bash
+# Switch to finman user
+su - finman
 
-Open PowerShell in your project directory:
-```powershell
-cd D:\Projects\Dev\financial
+# Update package list
+sudo apt update
 
-# Upload deployment script
-scp deployment/deploy-vps.sh finman@your_vps_ip:~/
+# Install Git
+sudo apt install -y git
 
-# Verify upload
-ssh finman@your_vps_ip "ls -l ~/deploy-vps.sh"
+# Verify installation
+git --version
+# Should show: git version 2.x.x
+
+# Configure Git (use your details)
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
 ```
 
-**If you get "scp not found" on Windows:**
-```powershell
-# Use WinSCP or FileZilla
-# Or use Git Bash which includes scp
+### Step 1.6: Clone Repository to VPS
+
+```bash
+# Still as finman user
+cd ~
+
+# Clone your repository
+git clone https://github.com/yourusername/FinMan.git
+
+# Enter the directory
+cd FinMan
+
+# Verify files are present
+ls -la
+# Should show: apps/, deployment/, *.md files, etc.
+
+# Check current branch
+git branch
+# Should show: * main
+```
+
+**Alternative: Clone via SSH (if you have SSH keys set up):**
+```bash
+# Clone via SSH
+git clone git@github.com:yourusername/FinMan.git
 ```
 
 ---
@@ -170,14 +216,14 @@ ssh finman@your_vps_ip "ls -l ~/deploy-vps.sh"
 ### Step 2.1: Run Deployment Script
 
 ```bash
-# SSH to VPS as finman user
-ssh finman@your_vps_ip
+# Should already be in FinMan directory
+cd ~/FinMan
 
-# Make script executable
-chmod +x ~/deploy-vps.sh
+# Make deployment script executable
+chmod +x deployment/deploy-vps.sh
 
 # Run the deployment script
-./deploy-vps.sh
+./deployment/deploy-vps.sh
 ```
 
 ### Step 2.2: Follow Script Prompts
@@ -197,7 +243,9 @@ Press Enter for default: finman_user
 **3. Database Password:**
 ```
 Enter a strong password (save this!)
-Example: MyStr0ng!Pass#2024_Fin
+⚠️ IMPORTANT: Do NOT use single quotes (') in the password
+✓ Safe characters: A-Z, a-z, 0-9, @, #, $, %, &, *, -, _
+Example: MyStr0ng@Pass#2024_Fin
 ```
 
 **4. JWT Secret:**
@@ -695,6 +743,28 @@ android\app\build\outputs\apk\release\app-release.apk
 
 ## 🚨 Troubleshooting Guide
 
+### Issue: Database Creation Failed - Special Characters in Password
+
+**Error Message:**
+```
+ERROR: syntax error at or near "!"
+ERROR: CREATE DATABASE cannot be executed from a function
+```
+
+**Solution:**
+```bash
+# The password contains problematic characters for PostgreSQL
+# Avoid using these characters: ' (single quote), ! (exclamation)
+# Use safe characters: A-Z, a-z, 0-9, @, #, $, %, &, *, -, _
+
+# If script already failed, clean up and restart:
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS finman_db;"
+sudo -u postgres psql -c "DROP USER IF EXISTS finman_admin;"
+
+# Then run the deployment script again with a safe password
+./deployment/deploy-vps.sh
+```
+
 ### Issue: SSH Connection Refused
 
 **Solution:**
@@ -839,15 +909,45 @@ If all checks pass, congratulations! You now have:
 
 ### Deploy Updates
 
-```bash
-# Push code to GitHub
-git push origin main
+**On your Windows machine:**
+```powershell
+# Navigate to project
+cd D:\Projects\Dev\financial
 
+# Make your code changes...
+
+# Check what changed
+git status
+
+# Stage all changes
+git add .
+
+# Commit with message
+git commit -m "Description of your changes"
+
+# Push to GitHub
+git push origin main
+```
+
+**On VPS:**
+```bash
 # SSH to VPS
 ssh finman@your_vps_ip
 
-# Run update
-./update-vps.sh
+# Navigate to project
+cd ~/FinMan
+
+# Pull latest changes
+git pull origin main
+
+# Run update script (rebuilds and restarts)
+./deployment/update-vps.sh
+```
+
+**Or use the automated update script from Windows:**
+```powershell
+# This will SSH, pull, and update automatically
+ssh finman@your_vps_ip "cd ~/FinMan && git pull && ./deployment/update-vps.sh"
 ```
 
 ### Check Health
@@ -864,6 +964,45 @@ pm2 status
 
 ```bash
 pm2 logs finman-api --lines 100
+```
+
+### Pull Latest Code Changes
+
+```bash
+# SSH to VPS
+ssh finman@your_vps_ip
+
+# Navigate to project
+cd ~/FinMan
+
+# Check current status
+git status
+
+# Pull latest changes from GitHub
+git pull origin main
+
+# If there are updates, restart app
+pm2 restart finman-api
+
+# Or use the automated update script
+./deployment/update-vps.sh
+```
+
+### Rollback to Previous Version
+
+```bash
+# View commit history
+git log --oneline -10
+
+# Rollback to specific commit
+git checkout <commit-hash>
+
+# Rebuild and restart
+./deployment/update-vps.sh
+
+# Or return to latest
+git checkout main
+git pull
 ```
 
 ---

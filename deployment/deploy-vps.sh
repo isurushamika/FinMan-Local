@@ -109,25 +109,27 @@ DB_USER=${DB_USER:-finman_user}
 read -sp "Database password: " DB_PASSWORD
 echo ""
 
-# Create database and user
-sudo -u postgres psql << EOF
-DO \$\$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$DB_NAME') THEN
-        CREATE DATABASE $DB_NAME;
-    END IF;
-END
-\$\$;
+# Validate password doesn't contain single quotes (would break SQL)
+if [[ "$DB_PASSWORD" == *"'"* ]]; then
+    print_error "Password cannot contain single quotes ('), please choose a different password"
+    exit 1
+fi
 
-DO \$\$
-BEGIN
-    IF NOT EXISTS (SELECT FROM pg_user WHERE usename = '$DB_USER') THEN
-        CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASSWORD';
-        GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
-    END IF;
-END
-\$\$;
-EOF
+# Create database and user using separate commands to avoid heredoc escaping issues
+echo "Creating database if not exists..."
+sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 || \
+sudo -u postgres psql -c "CREATE DATABASE $DB_NAME;"
+
+echo "Creating user and granting privileges..."
+sudo -u postgres psql -tc "SELECT 1 FROM pg_user WHERE usename = '$DB_USER'" | grep -q 1 || \
+sudo -u postgres psql -c "CREATE USER $DB_USER WITH ENCRYPTED PASSWORD '$DB_PASSWORD';"
+
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
+
+# Grant schema permissions
+sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL ON SCHEMA public TO $DB_USER;"
+sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;"
+sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;"
 
 print_status "Database created: $DB_NAME"
 
