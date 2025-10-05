@@ -19,7 +19,7 @@ Complete guide for deploying FinMan backend and frontend.
 **Direct on VPS (Git-based):**
 ```bash
 # SSH into VPS
-ssh root@198.23.228.126
+ssh root@172.245.138.228
 
 # Clone/update repo and run deployment
 cd /opt
@@ -31,7 +31,7 @@ sudo bash deployment/auto-deploy-vps.sh
 
 **One-liner from anywhere:**
 ```bash
-ssh root@198.23.228.126 "cd /opt && (git clone https://github.com/isurushamika/FinMan.git || (cd FinMan && git pull)) && cd FinMan && chmod +x deployment/auto-deploy-vps.sh && bash deployment/auto-deploy-vps.sh"
+ssh root@172.245.138.228 "cd /opt && (git clone https://github.com/isurushamika/FinMan.git || (cd FinMan && git pull)) && cd FinMan && chmod +x deployment/auto-deploy-vps.sh && bash deployment/auto-deploy-vps.sh"
 ```
 
 **What it does:**
