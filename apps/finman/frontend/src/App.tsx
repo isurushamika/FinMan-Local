@@ -153,26 +153,10 @@ function App() {
     });
   };
 
+  // Update filtered transactions when transactions change
   useEffect(() => {
-    saveTransactions(transactions);
     setFilteredTransactions(transactions);
   }, [transactions]);
-
-  useEffect(() => {
-    saveBudgets(budgets);
-  }, [budgets]);
-
-  useEffect(() => {
-    saveRecurring(recurring);
-  }, [recurring]);
-
-  useEffect(() => {
-    saveItems(items);
-  }, [items]);
-
-  useEffect(() => {
-    savePurchases(purchases);
-  }, [purchases]);
 
   // Auto-generate recurring transactions
   useEffect(() => {
@@ -261,49 +245,82 @@ function App() {
     }
   };
 
-  const handleAddBudget = (budget: Omit<Budget, 'id'>) => {
-    const newBudget: Budget = {
-      ...budget,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    };
-    setBudgets([...budgets, newBudget]);
+  const handleAddBudget = async (budget: Omit<Budget, 'id'>) => {
+    try {
+      const newBudget = await budgetsApi.create(budget as any);
+      setBudgets([...budgets, newBudget as any]);
+    } catch (error) {
+      console.error('Failed to add budget:', error);
+      alert('Failed to add budget. Please try again.');
+    }
   };
 
-  const handleDeleteBudget = (id: string) => {
+  const handleDeleteBudget = async (id: string) => {
     if (confirm('Are you sure you want to delete this budget?')) {
-      setBudgets(budgets.filter((b) => b.id !== id));
+      try {
+        await budgetsApi.delete(id);
+        setBudgets(budgets.filter((b) => b.id !== id));
+      } catch (error) {
+        console.error('Failed to delete budget:', error);
+        alert('Failed to delete budget. Please try again.');
+      }
     }
   };
 
-  const handleAddRecurring = (rec: Omit<RecurringTransaction, 'id'>) => {
-    const newRecurring: RecurringTransaction = {
-      ...rec,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    };
-    setRecurring([...recurring, newRecurring]);
+  const handleAddRecurring = async (rec: Omit<RecurringTransaction, 'id'>) => {
+    try {
+      const newRecurring = await recurringApi.create(rec as any);
+      setRecurring([...recurring, newRecurring as any]);
+    } catch (error) {
+      console.error('Failed to add recurring transaction:', error);
+      alert('Failed to add recurring transaction. Please try again.');
+    }
   };
 
-  const handleToggleRecurring = (id: string) => {
-    setRecurring(recurring.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r)));
+  const handleToggleRecurring = async (id: string) => {
+    const item = recurring.find(r => r.id === id);
+    if (item) {
+      try {
+        await recurringApi.update(id, { isActive: !item.isActive } as any);
+        setRecurring(recurring.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r)));
+      } catch (error) {
+        console.error('Failed to toggle recurring transaction:', error);
+        alert('Failed to toggle recurring transaction. Please try again.');
+      }
+    }
   };
 
-  const handleDeleteRecurring = (id: string) => {
+  const handleDeleteRecurring = async (id: string) => {
     if (confirm('Are you sure you want to delete this recurring transaction?')) {
-      setRecurring(recurring.filter((r) => r.id !== id));
+      try {
+        await recurringApi.delete(id);
+        setRecurring(recurring.filter((r) => r.id !== id));
+      } catch (error) {
+        console.error('Failed to delete recurring transaction:', error);
+        alert('Failed to delete recurring transaction. Please try again.');
+      }
     }
   };
 
-  const handleAddItem = (item: Omit<Item, 'id'>) => {
-    const newItem: Item = {
-      ...item,
-      id: Date.now().toString(),
-    };
-    setItems([...items, newItem]);
+  const handleAddItem = async (item: Omit<Item, 'id'>) => {
+    try {
+      const newItem = await itemsApi.create(item as any);
+      setItems([...items, newItem as any]);
+    } catch (error) {
+      console.error('Failed to add item:', error);
+      alert('Failed to add item. Please try again.');
+    }
   };
 
-  const handleDeleteItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
-    setPurchases(purchases.filter((purchase) => purchase.itemId !== id));
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await itemsApi.delete(id);
+      setItems(items.filter((item) => item.id !== id));
+      setPurchases(purchases.filter((purchase) => purchase.itemId !== id));
+    } catch (error) {
+      console.error('Failed to delete item:', error);
+      alert('Failed to delete item. Please try again.');
+    }
   };
 
   const handleImportData = (data: {
