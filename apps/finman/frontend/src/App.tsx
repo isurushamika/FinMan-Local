@@ -71,13 +71,20 @@ function App() {
       localStorage.removeItem('financial_recurring');
       localStorage.removeItem('financial_items');
       localStorage.removeItem('financial_purchases');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load data:', error);
-      alert('Failed to sync data from server. Please check your connection and try again.');
+      
+      // Check if it's an authentication error
+      if (error?.status === 401) {
+        alert('Your session has expired. Please log in again.');
+        logout();
+      } else {
+        alert(`Failed to sync data from server: ${error?.message || 'Unknown error'}. Please try again.`);
+      }
     } finally {
       setIsRefreshing(false);
     }
-  }, []);
+  }, [logout]);
 
   // Load initial data from API
   useEffect(() => {
