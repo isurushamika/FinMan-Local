@@ -42,12 +42,17 @@ app.use(morgan('combined')); // Logging
 // CORS configuration - allow multiple origins
 const allowedOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['http://localhost:5173', 'https://app.gearsandai.me'];
+  : ['http://localhost:5173', 'https://app.gearsandai.me', 'http://localhost', 'https://localhost'];
 
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // Allow Capacitor apps (they use https://localhost or http://localhost)
+    if (origin === 'https://localhost' || origin === 'http://localhost') {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
       callback(null, true);
