@@ -14,10 +14,45 @@ Complete guide for deploying FinMan backend and frontend.
 
 ## 1️⃣ Backend Deployment (VPS)
 
+### Automated Deployment (Recommended) 🚀
+
+**Direct on VPS (Git-based):**
+```bash
+# SSH into VPS
+ssh root@198.23.228.126
+
+# Clone/update repo and run deployment
+cd /opt
+git clone https://github.com/isurushamika/FinMan.git || (cd FinMan && git pull)
+cd FinMan
+chmod +x deployment/auto-deploy-vps.sh
+sudo bash deployment/auto-deploy-vps.sh
+```
+
+**One-liner from anywhere:**
+```bash
+ssh root@198.23.228.126 "cd /opt && (git clone https://github.com/isurushamika/FinMan.git || (cd FinMan && git pull)) && cd FinMan && chmod +x deployment/auto-deploy-vps.sh && bash deployment/auto-deploy-vps.sh"
+```
+
+**What it does:**
+- ✅ Installs all dependencies (Node.js, PostgreSQL, Nginx, PM2, Certbot)
+- ✅ Sets up database with correct user/password
+- ✅ Clones/updates repository (handles Git conflicts automatically)
+- ✅ Installs backend dependencies
+- ✅ Runs database migrations
+- ✅ Starts backend with PM2
+- ✅ Configures Nginx reverse proxy
+- ✅ Installs SSL certificate
+- ✅ Verifies everything is working
+
+**Time:** 5-10 minutes for complete deployment
+
+---
+
 ### Already Deployed ✅
 Your backend is live at https://api.gearsandai.me
 
-### Update Backend
+### Manual Update Backend
 
 ```bash
 # SSH into VPS
