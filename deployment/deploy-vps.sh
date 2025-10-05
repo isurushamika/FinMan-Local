@@ -133,10 +133,20 @@ sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN
 
 print_status "Database created: $DB_NAME"
 
-# Step 7: Clone/Update repository
+# Step 7: Setup application directory
 echo ""
 echo "Step 7: Setting up application directory..."
-if [ ! -d "$APP_DIR" ]; then
+
+# Check if we're already in a git repository
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    APP_DIR=$(pwd)
+    print_status "Using current directory: $APP_DIR"
+    
+    # Update to latest code
+    git pull origin main
+    print_status "Repository updated to latest"
+    
+elif [ ! -d "$APP_DIR" ]; then
     sudo mkdir -p "$APP_DIR"
     sudo chown -R $USER:$USER "$APP_DIR"
     print_status "Created directory: $APP_DIR"
@@ -144,12 +154,22 @@ if [ ! -d "$APP_DIR" ]; then
     read -p "Git repository URL: " GIT_REPO
     git clone "$GIT_REPO" "$APP_DIR"
     print_status "Repository cloned"
-else
+    
+elif [ -d "$APP_DIR/.git" ]; then
     print_status "Directory already exists: $APP_DIR"
     cd "$APP_DIR"
     git pull origin main
     print_status "Repository updated"
+    
+else
+    print_error "Directory $APP_DIR exists but is not a git repository"
+    print_warning "Please remove it or clone repository manually"
+    exit 1
 fi
+
+# Update paths based on actual app directory
+BACKEND_DIR="$APP_DIR/apps/finman/backend"
+FRONTEND_DIR="$APP_DIR/apps/finman/frontend"
 
 # Step 8: Setup backend
 echo ""
