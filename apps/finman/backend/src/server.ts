@@ -17,6 +17,7 @@ import budgetRoutes from './routes/budget.routes';
 import recurringRoutes from './routes/recurring.routes';
 import itemRoutes from './routes/item.routes';
 import purchaseRoutes from './routes/purchase.routes';
+import subscriptionRoutes from './routes/subscription.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -81,6 +82,7 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/purchases', purchaseRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // Error handling
 app.use(errorHandler);

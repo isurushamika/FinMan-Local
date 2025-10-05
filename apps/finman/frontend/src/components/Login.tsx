@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { LogIn, Mail, Lock, AlertCircle, Server } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LogIn, Mail, Lock, AlertCircle, Server, Fingerprint } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_CONFIG } from '../api/config';
+import { 
+  isBiometricAvailable, 
+  getBiometricType, 
+  authenticateWithBiometrics,
+  saveBiometricCredentials,
+  isNativeApp 
+} from '../utils/biometric';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
@@ -13,6 +20,45 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricType, setBiometricType] = useState('Biometric');
+
+  // Check if biometric is available on mount
+  useEffect(() => {
+    const checkBiometric = async () => {
+      if (isNativeApp()) {
+        const available = await isBiometricAvailable();
+        setBiometricAvailable(available);
+        if (available) {
+          const type = await getBiometricType();
+          setBiometricType(type);
+          // Optionally auto-trigger biometric auth on load
+          // await handleBiometricLogin();
+        }
+      }
+    };
+    checkBiometric();
+  }, []);
+
+  const handleBiometricLogin = async () => {
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const credentials = await authenticateWithBiometrics();
+      
+      if (credentials) {
+        await login(credentials.username, credentials.password);
+      } else {
+        setError('Biometric authentication failed or cancelled');
+      }
+    } catch (err: any) {
+      console.error('Biometric login error:', err);
+      setError('Biometric login failed. Please use email and password.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +67,15 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
 
     try {
       await login(email, password);
+      
+      // After successful login, save credentials for biometric auth if available
+      if (isNativeApp() && biometricAvailable) {
+        try {
+          await saveBiometricCredentials(email, password);
+        } catch (err) {
+          console.error('Failed to save biometric credentials:', err);
+        }
+      }
     } catch (err: any) {
       console.error('Login error:', err);
       const errorMsg = err.message || err.error || 'Login failed. Please check your credentials and internet connection.';
@@ -101,6 +156,30 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
+
+          {/* Biometric Login Button */}
+          {biometricAvailable && (
+            <>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gray-800 dark:bg-gray-900 text-gray-400">Or</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={isLoading}
+                className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Fingerprint className="w-5 h-5" />
+                Sign in with {biometricType}
+              </button>
+            </>
+          )}
         </form>
 
         <div className="mt-6 text-center">

@@ -23,6 +23,7 @@ model User {
   recurring    RecurringTransaction[]
   items        Item[]
   purchases    ItemPurchase[]
+  subscriptions Subscription[]
 
   @@map("users")
 }
@@ -124,4 +125,25 @@ model ItemPurchase {
   @@index([itemId])
   @@index([userId, purchaseDate])
   @@map("item_purchases")
+}
+
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  amount          Float
+  billingCycle    String   // 'monthly' | 'yearly' | 'weekly' | 'quarterly'
+  nextBillingDate String
+  category        String
+  description     String?
+  isActive        Boolean  @default(true)
+  autoRenew       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isActive])
+  @@index([userId, nextBillingDate])
+  @@map("subscriptions")
 }

@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, BudgetProgress } from './types';
+import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, BudgetProgress, Subscription } from './types';
 import { transactionsApi } from './api/transactions';
 import { budgetsApi } from './api/budgets';
 import { recurringApi } from './api/recurring';
 import { itemsApi } from './api/items';
 import { purchasesApi } from './api/purchases';
+import { subscriptionsApi } from './api/subscriptions';
 import { loadTransactions, loadBudgets, loadRecurring, loadItems, loadPurchases } from './utils/storage';
 import { 
   loadNotificationSettings, 
@@ -19,6 +20,7 @@ import SummaryCards from './components/SummaryCards';
 import Charts from './components/Charts';
 import { BudgetManager } from './components/BudgetManager';
 import { RecurringTransactions } from './components/RecurringTransactions';
+import { Subscriptions } from './components/Subscriptions';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
@@ -26,7 +28,7 @@ import SettingsComponent from './components/Settings';
 import Notifications from './components/Notifications';
 import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
 import { useAuth } from './contexts/AuthContext';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User } from 'lucide-react';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User, CreditCard } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
   const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [purchases, setPurchases] = useState<ItemPurchase[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'subscriptions' | 'settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
@@ -45,12 +48,13 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [transactionsData, budgetsData, recurringData, itemsData, purchasesData] = await Promise.all([
+        const [transactionsData, budgetsData, recurringData, itemsData, purchasesData, subscriptionsData] = await Promise.all([
           transactionsApi.getAll(),
           budgetsApi.getAll(),
           recurringApi.getAll(),
           itemsApi.getAll(),
           purchasesApi.getAll(),
+          subscriptionsApi.getAll(),
         ]);
         
         setTransactions(transactionsData as any);
@@ -59,6 +63,7 @@ function App() {
         setRecurring(recurringData as any);
         setItems(itemsData as any);
         setPurchases(purchasesData as any);
+        setSubscriptions(subscriptionsData as any);
       } catch (error) {
         console.error('Failed to load data:', error);
         // Fallback to local storage if API fails
@@ -323,6 +328,34 @@ function App() {
     }
   };
 
+  // Subscription handlers
+  const handleAddSubscription = async (subscription: Omit<Subscription, 'id'>) => {
+    try {
+      const newSubscription = await subscriptionsApi.create(subscription);
+      setSubscriptions([...subscriptions, newSubscription as any]);
+    } catch (error) {
+      console.error('Failed to add subscription:', error);
+    }
+  };
+
+  const handleUpdateSubscription = async (id: string, subscription: Partial<Subscription>) => {
+    try {
+      const updated = await subscriptionsApi.update(id, subscription);
+      setSubscriptions(subscriptions.map(s => s.id === id ? updated as any : s));
+    } catch (error) {
+      console.error('Failed to update subscription:', error);
+    }
+  };
+
+  const handleDeleteSubscription = async (id: string) => {
+    try {
+      await subscriptionsApi.delete(id);
+      setSubscriptions(subscriptions.filter(s => s.id !== id));
+    } catch (error) {
+      console.error('Failed to delete subscription:', error);
+    }
+  };
+
   const handleImportData = (data: {
     transactions: Transaction[];
     budgets: Budget[];
@@ -482,6 +515,17 @@ function App() {
               <Repeat className="w-4 h-4" />
               <span className="hidden sm:inline">Recurring</span>
             </button>
+            <button
+              onClick={() => setActiveTab('subscriptions')}
+              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
+                activeTab === 'subscriptions'
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">Subscriptions</span>
+            </button>
 
             {/* Divider */}
             <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
@@ -501,19 +545,6 @@ function App() {
 
             {/* Divider */}
             <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
-
-            {/* Subscriptions */}
-            <button
-              onClick={() => setActiveTab('subscriptions')}
-              className={`px-4 py-3 font-medium transition-all border-b-2 flex items-center gap-2 ${
-                activeTab === 'subscriptions'
-                  ? 'border-primary-600 text-primary-600'
-                  : 'border-transparent text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <Package className="w-4 h-4" />
-              <span className="hidden sm:inline">Subscriptions</span>
-            </button>
 
             {/* Settings (Security + Notifications) */}
             <button
@@ -620,13 +651,12 @@ function App() {
         {activeTab === 'settings' && <SettingsComponent />}
 
         {activeTab === 'subscriptions' && (
-          <div className="card">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">Subscriptions</h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Subscription tracking feature coming soon! This will allow you to track recurring subscriptions
-              with different billing cycles (monthly, yearly, weekly, quarterly).
-            </p>
-          </div>
+          <Subscriptions
+            subscriptions={subscriptions}
+            onAdd={handleAddSubscription}
+            onUpdate={handleUpdateSubscription}
+            onDelete={handleDeleteSubscription}
+          />
         )}
 
         {activeTab === 'data' && (
