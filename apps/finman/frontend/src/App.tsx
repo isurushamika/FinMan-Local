@@ -22,6 +22,7 @@ import AuthScreen from './components/AuthScreen';
 import SecuritySettings from './components/SecuritySettings';
 import Notifications from './components/Notifications';
 import NotificationSettingsComponent from './components/NotificationSettings';
+import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
 import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Shield, Bell, Settings } from 'lucide-react';
 import './index.css';
 
@@ -409,6 +410,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Offline Banner */}
+      <OfflineBanner />
+      
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -421,12 +425,17 @@ function App() {
                 FinMan
               </h1>
             </div>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              🔒 Lock
-            </button>
+            
+            {/* Sync Status & Lock Button */}
+            <div className="flex items-center gap-4">
+              <SyncStatusIndicator />
+              <button
+                onClick={handleLogout}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                🔒 Lock
+              </button>
+            </div>
           </div>
         </div>
       </header>

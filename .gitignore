@@ -85,3 +85,24 @@ temp/
 # TypeScript
 *.tsbuildinfo
 
+# Android
+**/android/build/
+**/android/app/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/.idea/
+**/android/captures/
+**/android/.externalNativeBuild/
+**/android/.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# iOS (if needed later)
+**/ios/build/
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+

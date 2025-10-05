@@ -310,9 +310,9 @@ pm2 status
 sudo systemctl status nginx
 # Should show: active (running)
 
-# Check database
-psql -U finman_user -d finman_production -c "SELECT COUNT(*) FROM \"User\";"
-# Should show: 0 (no users yet)
+# Check database connection
+psql -U finman_user -d finman_production -h localhost -c "\dt"
+# Should show list of tables (User, Transaction, Budget, etc.)
 ```
 
 **Test API (HTTP - before SSL):**
