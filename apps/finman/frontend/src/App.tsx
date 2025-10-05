@@ -6,7 +6,6 @@ import { recurringApi } from './api/recurring';
 import { itemsApi } from './api/items';
 import { purchasesApi } from './api/purchases';
 import { subscriptionsApi } from './api/subscriptions';
-import { loadTransactions, loadBudgets, loadRecurring, loadItems, loadPurchases } from './utils/storage';
 import { 
   loadNotificationSettings, 
   checkUpcomingBills, 
@@ -65,17 +64,16 @@ function App() {
       setItems(itemsData as any);
       setPurchases(purchasesData as any);
       setSubscriptions(subscriptionsData as any);
+      
+      // Clear localStorage since we're using API mode
+      localStorage.removeItem('financial_transactions');
+      localStorage.removeItem('financial_budgets');
+      localStorage.removeItem('financial_recurring');
+      localStorage.removeItem('financial_items');
+      localStorage.removeItem('financial_purchases');
     } catch (error) {
       console.error('Failed to load data:', error);
-      alert('Failed to sync data. Please check your connection.');
-      // Fallback to local storage if API fails
-      const loaded = loadTransactions();
-      setTransactions(loaded);
-      setFilteredTransactions(loaded);
-      setBudgets(loadBudgets());
-      setRecurring(loadRecurring());
-      setItems(loadItems());
-      setPurchases(loadPurchases());
+      alert('Failed to sync data from server. Please check your connection and try again.');
     } finally {
       setIsRefreshing(false);
     }
