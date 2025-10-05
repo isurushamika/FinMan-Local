@@ -233,7 +233,7 @@ ls -la deployment/
 chmod +x deployment/deploy-vps.sh
 
 # Run the deployment script
-./deployment/deploy-vps.sh
+    ./deployment/deploy-vps.sh
 ```
 
 ### Step 2.2: Follow Script Prompts
@@ -796,6 +796,57 @@ sudo -u postgres psql -d finman_production -c "GRANT ALL ON SCHEMA public TO fin
 cd ~/FinMan/apps/finman/backend
 npm install --production
 # Create .env file manually (see VPS_DEPLOYMENT_GUIDE.md)
+```
+
+### Issue: Database Connection Error - Can't Reach Database Server
+
+**Error Message:**
+```
+Error: P1001: Can't reach database server at `Pass:5432`
+Datasource "db": PostgreSQL database "postgres", schema "public" at "Pass"
+```
+
+**Cause:** Special characters in the database password (like `@`, `#`, `$`) are not URL-encoded in DATABASE_URL.
+
+**Solution:**
+```bash
+# 1. Pull the latest fixed deployment script
+cd ~/FinMan
+git checkout -- deployment/deploy-vps.sh
+git pull origin main
+
+# 2. Remove the incorrectly created .env file
+rm ~/FinMan/apps/finman/backend/.env
+
+# 3. Run the deployment script again
+./deployment/deploy-vps.sh
+
+# The updated script will automatically URL-encode the password
+```
+
+**Alternative: Fix .env file manually**
+```bash
+# Edit the .env file
+cd ~/FinMan/apps/finman/backend
+nano .env
+
+# Find the DATABASE_URL line and URL-encode special characters:
+# @ becomes %40
+# # becomes %23
+# $ becomes %24
+# % becomes %25
+# & becomes %26
+# * becomes %2A
+
+# Example:
+# If password is: MyPass@2024#Fin
+# DATABASE_URL should be:
+# DATABASE_URL="postgresql://finman_user:MyPass%402024%23Fin@localhost:5432/finman_production?schema=public"
+
+# Save and exit (Ctrl+X, Y, Enter)
+
+# Test the connection
+npx prisma migrate deploy
 ```
 
 ### Issue: SSH Connection Refused

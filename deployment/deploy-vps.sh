@@ -190,9 +190,13 @@ if [ ! -f ".env" ]; then
     
     read -p "Domain (e.g., example.com): " DOMAIN
     
+    # URL encode the password for DATABASE_URL
+    # Special characters like @, #, $, %, &, * need to be encoded
+    DB_PASSWORD_ENCODED=$(node -e "console.log(encodeURIComponent('$DB_PASSWORD'))")
+    
     cat > .env << EOL
 # Database
-DATABASE_URL="postgresql://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME?schema=public"
+DATABASE_URL="postgresql://$DB_USER:$DB_PASSWORD_ENCODED@localhost:5432/$DB_NAME?schema=public"
 
 # Server
 NODE_ENV=production
