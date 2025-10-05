@@ -153,11 +153,11 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
   const inactiveSubscriptions = subscriptions.filter(sub => !sub.isActive);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             Subscription Tracker
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -166,45 +166,45 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center gap-2 whitespace-nowrap"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           Add Subscription
         </button>
       </div>
 
       {/* Summary Card */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <p className="text-blue-100 text-sm">Monthly Cost (Est.)</p>
-            <p className="text-3xl font-bold mt-1">LKR {getTotalMonthlyCost().toFixed(2)}</p>
+            <p className="text-blue-100 text-sm uppercase tracking-wide">Monthly Cost (Est.)</p>
+            <p className="text-3xl md:text-4xl font-bold mt-2">LKR {getTotalMonthlyCost().toFixed(2)}</p>
           </div>
-          <div className="text-right">
-            <p className="text-blue-100 text-sm">Active Subscriptions</p>
-            <p className="text-3xl font-bold mt-1">{activeSubscriptions.length}</p>
+          <div className="sm:text-right">
+            <p className="text-blue-100 text-sm uppercase tracking-wide">Active Subscriptions</p>
+            <p className="text-3xl md:text-4xl font-bold mt-2">{activeSubscriptions.length}</p>
           </div>
         </div>
       </div>
 
       {/* Add/Edit Form */}
       {showForm && (
-        <div className="card">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="card border border-gray-200 dark:border-gray-700">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {editingId ? 'Edit Subscription' : 'New Subscription'}
               </h3>
               <button
                 type="button"
                 onClick={resetForm}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="label">Subscription Name *</label>
                 <input
@@ -212,7 +212,7 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="input"
-                  placeholder="Netflix, Spotify, etc."
+                  placeholder="e.g., Netflix, Spotify"
                   required
                 />
               </div>
@@ -234,7 +234,7 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
               <div>
                 <label className="label">Amount (LKR) *</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-semibold text-gray-600 dark:text-gray-400">
                     LKR
                   </span>
                   <input
@@ -242,7 +242,7 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                     step="0.01"
                     value={formData.amount || ''}
                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    className="input pl-14"
+                    className="input pl-16"
                     placeholder="0.00"
                     required
                   />
@@ -268,35 +268,35 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
               <div>
                 <label className="label">Next Billing Date *</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="date"
                     value={formData.nextBillingDate}
                     onChange={(e) => setFormData({ ...formData, nextBillingDate: e.target.value })}
-                    className="input pl-10"
+                    className="input pl-12"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex items-center gap-6 pt-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Active</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">Active</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.autoRenew}
                     onChange={(e) => setFormData({ ...formData, autoRenew: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Auto-Renew</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white">Auto-Renew</span>
                 </label>
               </div>
 
@@ -305,18 +305,18 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="input"
-                  rows={2}
-                  placeholder="Optional notes about this subscription"
+                  className="input resize-none"
+                  rows={3}
+                  placeholder="Add optional notes about this subscription..."
                 />
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <button type="submit" className="btn-primary">
+            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button type="submit" className="btn-primary flex-1 sm:flex-none">
                 {editingId ? 'Update' : 'Add'} Subscription
               </button>
-              <button type="button" onClick={resetForm} className="btn-secondary">
+              <button type="button" onClick={resetForm} className="btn-secondary flex-1 sm:flex-none">
                 Cancel
               </button>
             </div>
@@ -326,9 +326,12 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
 
       {/* Active Subscriptions */}
       {activeSubscriptions.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Active Subscriptions
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+              ({activeSubscriptions.length})
+            </span>
           </h3>
           <div className="grid gap-4">
             {activeSubscriptions.map((subscription) => {
@@ -339,47 +342,52 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
               return (
                 <div
                   key={subscription.id}
-                  className={`card border-l-4 ${
-                    isOverdue ? 'border-l-red-500' :
-                    isDueSoon ? 'border-l-yellow-500' :
+                  className={`card border-l-4 transition-all hover:shadow-xl ${
+                    isOverdue ? 'border-l-red-500 bg-red-50/50 dark:bg-red-900/10' :
+                    isDueSoon ? 'border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/10' :
                     'border-l-green-500'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <h4 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
                           {subscription.name}
                         </h4>
-                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                        <span className="text-xs font-medium px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 whitespace-nowrap">
                           {subscription.category}
                         </span>
                         {subscription.autoRenew && (
-                          <span title="Auto-Renew Enabled">
-                            <RefreshCw className="w-4 h-4 text-green-600" />
+                          <span title="Auto-Renew Enabled" className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <RefreshCw className="w-4 h-4" />
+                            <span className="text-xs font-medium hidden sm:inline">Auto-Renew</span>
                           </span>
                         )}
                       </div>
                       
                       {subscription.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
                           {subscription.description}
                         </p>
                       )}
 
-                      <div className="flex flex-wrap gap-4 text-sm">
-                        <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
-                          <span className="font-semibold">LKR {subscription.amount.toFixed(2)}</span>
-                          <span className="text-gray-500 dark:text-gray-400">/ {subscription.billingCycle}</span>
+                      <div className="flex flex-wrap gap-4 md:gap-6">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                            LKR {subscription.amount.toFixed(2)}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            / {subscription.billingCycle}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                          <span className={`${
-                            isOverdue ? 'text-red-600 font-semibold' :
-                            isDueSoon ? 'text-yellow-600 font-semibold' :
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-gray-400" />
+                          <span className={`text-sm font-medium ${
+                            isOverdue ? 'text-red-600 dark:text-red-400' :
+                            isDueSoon ? 'text-yellow-600 dark:text-yellow-400' :
                             'text-gray-700 dark:text-gray-300'
                           }`}>
-                            {isOverdue ? 'Overdue' :
+                            {isOverdue ? `Overdue by ${Math.abs(daysUntil)} day${Math.abs(daysUntil) !== 1 ? 's' : ''}` :
                              isDueSoon ? `Due in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}` :
                              format(parseISO(subscription.nextBillingDate), 'MMM dd, yyyy')}
                           </span>
@@ -387,28 +395,29 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex md:flex-col items-center gap-2 md:ml-4">
                       {isOverdue && (
                         <button
                           onClick={() => renewSubscription(subscription)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                          className="p-2 md:p-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                           title="Renew to next billing date"
                         >
-                          <RefreshCw className="w-4 h-4" />
+                          <RefreshCw className="w-5 h-5" />
                         </button>
                       )}
                       <button
                         onClick={() => toggleActive(subscription)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                        className="p-2 md:p-2.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors"
                         title="Mark as inactive"
                       >
-                        <ToggleRight className="w-5 h-5 text-green-600" />
+                        <ToggleRight className="w-6 h-6" />
                       </button>
                       <button
                         onClick={() => handleEdit(subscription)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                        className="p-2 md:p-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                        title="Edit subscription"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => {
@@ -416,9 +425,10 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                             onDelete(subscription.id);
                           }
                         }}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                        className="p-2 md:p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                        title="Delete subscription"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
@@ -431,43 +441,52 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
 
       {/* Inactive Subscriptions */}
       {inactiveSubscriptions.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Inactive Subscriptions
+            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+              ({inactiveSubscriptions.length})
+            </span>
           </h3>
           <div className="grid gap-4">
             {inactiveSubscriptions.map((subscription) => (
               <div
                 key={subscription.id}
-                className="card opacity-60 border-l-4 border-l-gray-400"
+                className="card opacity-70 hover:opacity-100 border-l-4 border-l-gray-400 dark:border-l-gray-600 transition-all hover:shadow-xl"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <h4 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white truncate">
                         {subscription.name}
                       </h4>
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                      <span className="text-xs font-medium px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                         {subscription.category}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span>LKR {subscription.amount.toFixed(2)} / {subscription.billingCycle}</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-bold text-gray-700 dark:text-gray-300">
+                        LKR {subscription.amount.toFixed(2)}
+                      </span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        / {subscription.billingCycle}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex md:flex-col items-center gap-2 md:ml-4">
                     <button
                       onClick={() => toggleActive(subscription)}
-                      className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                      className="p-2 md:p-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       title="Mark as active"
                     >
-                      <ToggleLeft className="w-5 h-5" />
+                      <ToggleLeft className="w-6 h-6" />
                     </button>
                     <button
                       onClick={() => handleEdit(subscription)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                      className="p-2 md:p-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                      title="Edit subscription"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => {
@@ -475,9 +494,10 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                           onDelete(subscription.id);
                         }
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                      className="p-2 md:p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                      title="Delete subscription"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -489,19 +509,19 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
 
       {/* Empty State */}
       {subscriptions.length === 0 && (
-        <div className="card text-center py-12">
-          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+        <div className="card text-center py-16 border-2 border-dashed border-gray-300 dark:border-gray-600">
+          <Calendar className="w-20 h-20 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             No Subscriptions Yet
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Start tracking your recurring subscriptions to manage your monthly expenses.
+          <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            Start tracking your recurring subscriptions to better manage your monthly expenses and never miss a payment.
           </p>
           <button
             onClick={() => setShowForm(true)}
-            className="btn-primary inline-flex items-center gap-2"
+            className="btn-primary inline-flex items-center gap-2 text-lg px-6 py-3"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             Add Your First Subscription
           </button>
         </div>

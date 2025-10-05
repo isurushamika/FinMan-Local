@@ -28,7 +28,7 @@ import SettingsComponent from './components/Settings';
 import Notifications from './components/Notifications';
 import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
 import { useAuth } from './contexts/AuthContext';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User, CreditCard } from 'lucide-react';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User, CreditCard, RefreshCw } from 'lucide-react';
 import './index.css';
 
 function App() {
@@ -43,45 +43,48 @@ function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'subscriptions' | 'settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Fetch all data from API
+  const fetchAllData = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const [transactionsData, budgetsData, recurringData, itemsData, purchasesData, subscriptionsData] = await Promise.all([
+        transactionsApi.getAll(),
+        budgetsApi.getAll(),
+        recurringApi.getAll(),
+        itemsApi.getAll(),
+        purchasesApi.getAll(),
+        subscriptionsApi.getAll(),
+      ]);
+      
+      setTransactions(transactionsData as any);
+      setFilteredTransactions(transactionsData as any);
+      setBudgets(budgetsData as any);
+      setRecurring(recurringData as any);
+      setItems(itemsData as any);
+      setPurchases(purchasesData as any);
+      setSubscriptions(subscriptionsData as any);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      alert('Failed to sync data. Please check your connection.');
+      // Fallback to local storage if API fails
+      const loaded = loadTransactions();
+      setTransactions(loaded);
+      setFilteredTransactions(loaded);
+      setBudgets(loadBudgets());
+      setRecurring(loadRecurring());
+      setItems(loadItems());
+      setPurchases(loadPurchases());
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   // Load initial data from API
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [transactionsData, budgetsData, recurringData, itemsData, purchasesData, subscriptionsData] = await Promise.all([
-          transactionsApi.getAll(),
-          budgetsApi.getAll(),
-          recurringApi.getAll(),
-          itemsApi.getAll(),
-          purchasesApi.getAll(),
-          subscriptionsApi.getAll(),
-        ]);
-        
-        setTransactions(transactionsData as any);
-        setFilteredTransactions(transactionsData as any);
-        setBudgets(budgetsData as any);
-        setRecurring(recurringData as any);
-        setItems(itemsData as any);
-        setPurchases(purchasesData as any);
-        setSubscriptions(subscriptionsData as any);
-      } catch (error) {
-        console.error('Failed to load data:', error);
-        // Fallback to local storage if API fails
-        const loaded = loadTransactions();
-        setTransactions(loaded);
-        setFilteredTransactions(loaded);
-        setBudgets(loadBudgets());
-        setRecurring(loadRecurring());
-        setItems(loadItems());
-        setPurchases(loadPurchases());
-      }
-    };
-
-    fetchData();
-    
-    // Load unread notification count
-    setUnreadNotifications(getUnreadCount());
-  }, []);
+    fetchAllData();
+  }, [fetchAllData]);
 
   // Check notifications when data changes
   useEffect(() => {
@@ -239,13 +242,34 @@ function App() {
   };
 
   const handleDeleteTransaction = async (id: string) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+    if (!confirm('Are you sure you want to delete this transaction?')) {
+      return;
+    }
+
+    try {
+      await transactionsApi.delete(id);
+      setTransactions(prev => prev.filter((t) => t.id !== id));
+      setFilteredTransactions(prev => prev.filter((t) => t.id !== id));
+      
+      // Optionally refresh all data to ensure sync
       try {
-        await transactionsApi.delete(id);
-        setTransactions(transactions.filter((t) => t.id !== id));
-      } catch (error) {
-        console.error('Failed to delete transaction:', error);
-        alert('Failed to delete transaction. Please try again.');
+        const updatedTransactions = await transactionsApi.getAll();
+        setTransactions(updatedTransactions as any);
+        setFilteredTransactions(updatedTransactions as any);
+      } catch (refreshError) {
+        console.error('Failed to refresh transactions after delete:', refreshError);
+      }
+    } catch (error) {
+      console.error('Failed to delete transaction:', error);
+      alert('Failed to delete transaction. Please check your connection and try again.');
+      
+      // Refresh to ensure we have latest state
+      try {
+        const updatedTransactions = await transactionsApi.getAll();
+        setTransactions(updatedTransactions as any);
+        setFilteredTransactions(updatedTransactions as any);
+      } catch (refreshError) {
+        console.error('Failed to refresh transactions:', refreshError);
       }
     }
   };
@@ -387,6 +411,22 @@ function App() {
             {/* Sync Status & User Info */}
             <div className="flex items-center gap-4">
               <SyncStatusIndicator />
+              
+              {/* Refresh/Sync Button */}
+              <button
+                onClick={fetchAllData}
+                disabled={isRefreshing}
+                className={`flex items-center gap-2 text-sm px-3 py-1 rounded-lg transition-colors ${
+                  isRefreshing 
+                    ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' 
+                    : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title="Refresh all data"
+              >
+                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden lg:inline">{isRefreshing ? 'Syncing...' : 'Sync'}</span>
+              </button>
+              
               <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                 <User className="w-4 h-4" />
                 <span>{user?.name || user?.email}</span>
