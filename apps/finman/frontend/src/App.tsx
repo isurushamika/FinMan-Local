@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, BudgetProgress } from './types';
+import { transactionsApi } from './api/transactions';
+import { budgetsApi } from './api/budgets';
+import { recurringApi } from './api/recurring';
+import { itemsApi } from './api/items';
+import { purchasesApi } from './api/purchases';
 import { loadTransactions, saveTransactions, loadBudgets, saveBudgets, loadRecurring, saveRecurring, loadItems, saveItems, loadPurchases, savePurchases } from './utils/storage';
 import { 
   loadNotificationSettings, 
@@ -36,24 +41,39 @@ function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'security' | 'notifications' | 'notification-settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  // Load initial data
+  // Load initial data from API
   useEffect(() => {
-    const loaded = loadTransactions();
-    setTransactions(loaded);
-    setFilteredTransactions(loaded);
+    const fetchData = async () => {
+      try {
+        const [transactionsData, budgetsData, recurringData, itemsData, purchasesData] = await Promise.all([
+          transactionsApi.getAll(),
+          budgetsApi.getAll(),
+          recurringApi.getAll(),
+          itemsApi.getAll(),
+          purchasesApi.getAll(),
+        ]);
+        
+        setTransactions(transactionsData as any);
+        setFilteredTransactions(transactionsData as any);
+        setBudgets(budgetsData as any);
+        setRecurring(recurringData as any);
+        setItems(itemsData as any);
+        setPurchases(purchasesData as any);
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        // Fallback to local storage if API fails
+        const loaded = loadTransactions();
+        setTransactions(loaded);
+        setFilteredTransactions(loaded);
+        setBudgets(loadBudgets());
+        setRecurring(loadRecurring());
+        setItems(loadItems());
+        setPurchases(loadPurchases());
+      }
+    };
+
+    fetchData();
     
-    const loadedBudgets = loadBudgets();
-    setBudgets(loadedBudgets);
-    
-    const loadedRecurring = loadRecurring();
-    setRecurring(loadedRecurring);
-
-    const loadedItems = loadItems();
-    setItems(loadedItems);
-
-    const loadedPurchases = loadPurchases();
-    setPurchases(loadedPurchases);
-
     // Load unread notification count
     setUnreadNotifications(getUnreadCount());
   }, []);
@@ -218,18 +238,26 @@ function App() {
     }
   }, [logout]);
 
-  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction: Transaction = {
-      ...transaction,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    };
-    setTransactions([...transactions, newTransaction]);
-    setActiveTab('transactions');
+  const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
+    try {
+      const newTransaction = await transactionsApi.create(transaction as any);
+      setTransactions([...transactions, newTransaction as any]);
+      setActiveTab('transactions');
+    } catch (error) {
+      console.error('Failed to add transaction:', error);
+      alert('Failed to add transaction. Please try again.');
+    }
   };
 
-  const handleDeleteTransaction = (id: string) => {
+  const handleDeleteTransaction = async (id: string) => {
     if (confirm('Are you sure you want to delete this transaction?')) {
-      setTransactions(transactions.filter((t) => t.id !== id));
+      try {
+        await transactionsApi.delete(id);
+        setTransactions(transactions.filter((t) => t.id !== id));
+      } catch (error) {
+        console.error('Failed to delete transaction:', error);
+        alert('Failed to delete transaction. Please try again.');
+      }
     }
   };
 
