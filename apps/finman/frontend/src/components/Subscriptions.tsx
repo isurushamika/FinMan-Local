@@ -95,10 +95,6 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
     onUpdate(subscription.id, { isActive: !subscription.isActive });
   };
 
-  const toggleAutoRenew = (subscription: Subscription) => {
-    onUpdate(subscription.id, { autoRenew: !subscription.autoRenew });
-  };
-
   const calculateNextBilling = (subscription: Subscription): string => {
     const currentDate = parseISO(subscription.nextBillingDate);
     const today = new Date();
