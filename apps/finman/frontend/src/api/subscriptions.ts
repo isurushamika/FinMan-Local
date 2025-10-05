@@ -1,57 +1,26 @@
 import { Subscription } from '../types';
+import { ApiClient } from './client';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
-  };
-};
+const client = new ApiClient();
 
 export const subscriptionsApi = {
   async getAll(): Promise<Subscription[]> {
-    const response = await fetch(`${API_URL}/api/subscriptions`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch subscriptions');
-    return response.json();
+    return client.get<Subscription[]>('/api/subscriptions');
   },
 
   async getById(id: string): Promise<Subscription> {
-    const response = await fetch(`${API_URL}/api/subscriptions/${id}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to fetch subscription');
-    return response.json();
+    return client.get<Subscription>(`/api/subscriptions/${id}`);
   },
 
   async create(subscription: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>): Promise<Subscription> {
-    const response = await fetch(`${API_URL}/api/subscriptions`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(subscription),
-    });
-    if (!response.ok) throw new Error('Failed to create subscription');
-    return response.json();
+    return client.post<Subscription>('/api/subscriptions', subscription);
   },
 
   async update(id: string, subscription: Partial<Subscription>): Promise<Subscription> {
-    const response = await fetch(`${API_URL}/api/subscriptions/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(subscription),
-    });
-    if (!response.ok) throw new Error('Failed to update subscription');
-    return response.json();
+    return client.put<Subscription>(`/api/subscriptions/${id}`, subscription);
   },
 
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/api/subscriptions/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) throw new Error('Failed to delete subscription');
+    return client.delete(`/api/subscriptions/${id}`);
   },
 };
