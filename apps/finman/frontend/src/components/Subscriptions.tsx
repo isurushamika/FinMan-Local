@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Subscription } from '../types';
-import { Plus, Edit2, Trash2, Calendar, DollarSign, ToggleLeft, ToggleRight, RefreshCw, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Calendar, ToggleLeft, ToggleRight, RefreshCw, X } from 'lucide-react';
 import { format, parseISO, addWeeks, addMonths, addYears } from 'date-fns';
 
 interface SubscriptionsProps {
@@ -178,7 +178,7 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <p className="text-blue-100 text-sm">Monthly Cost (Est.)</p>
-            <p className="text-3xl font-bold mt-1">${getTotalMonthlyCost().toFixed(2)}</p>
+            <p className="text-3xl font-bold mt-1">LKR {getTotalMonthlyCost().toFixed(2)}</p>
           </div>
           <div className="text-right">
             <p className="text-blue-100 text-sm">Active Subscriptions</p>
@@ -232,15 +232,17 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
               </div>
 
               <div>
-                <label className="label">Amount *</label>
+                <label className="label">Amount (LKR) *</label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                    LKR
+                  </span>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.amount || ''}
                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    className="input pl-10"
+                    className="input pl-14"
                     placeholder="0.00"
                     required
                   />
@@ -367,9 +369,8 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
 
                       <div className="flex flex-wrap gap-4 text-sm">
                         <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300">
-                          <DollarSign className="w-4 h-4" />
-                          <span className="font-semibold">${subscription.amount}</span>
-                          <span className="text-gray-500">/ {subscription.billingCycle}</span>
+                          <span className="font-semibold">LKR {subscription.amount.toFixed(2)}</span>
+                          <span className="text-gray-500 dark:text-gray-400">/ {subscription.billingCycle}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-400" />
@@ -451,8 +452,7 @@ export const Subscriptions: React.FC<SubscriptionsProps> = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <DollarSign className="w-4 h-4" />
-                      <span>${subscription.amount} / {subscription.billingCycle}</span>
+                      <span>LKR {subscription.amount.toFixed(2)} / {subscription.billingCycle}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
