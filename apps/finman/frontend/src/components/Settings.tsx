@@ -4,6 +4,7 @@ import { SecuritySettings as SecuritySettingsType, NotificationSettings as Notif
 import { loadUser, updateSecuritySettings, updateUser } from '../utils/auth';
 import { hashPassword, verifyPassword, validatePasswordStrength, generateSalt } from '../utils/encryption';
 import { loadNotificationSettings, saveNotificationSettings } from '../utils/notifications';
+import { SyncStatusIndicator } from './SyncStatus';
 
 const Settings: React.FC = () => {
   const user = loadUser();
@@ -108,6 +109,14 @@ const Settings: React.FC = () => {
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           Manage your security and notification preferences
         </p>
+      </div>
+
+      {/* Sync Status */}
+      <div className="card p-4">
+        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          Sync Status
+        </h3>
+        <SyncStatusIndicator />
       </div>
 
       {/* Section Tabs */}

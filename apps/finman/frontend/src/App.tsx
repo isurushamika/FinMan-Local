@@ -25,7 +25,7 @@ import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
 import SettingsComponent from './components/Settings';
 import Notifications from './components/Notifications';
-import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
+import { OfflineBanner } from './components/SyncStatus';
 import { useAuth } from './contexts/AuthContext';
 import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User, CreditCard, RefreshCw } from 'lucide-react';
 import './index.css';
@@ -413,10 +413,8 @@ function App() {
               </h1>
             </div>
             
-            {/* Sync Status & User Info */}
+            {/* User Info & Actions */}
             <div className="flex items-center gap-4">
-              <SyncStatusIndicator />
-              
               {/* Refresh/Sync Button */}
               <button
                 onClick={fetchAllData}
