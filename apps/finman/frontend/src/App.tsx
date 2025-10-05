@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, AuthState, BudgetProgress } from './types';
+import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, BudgetProgress } from './types';
 import { loadTransactions, saveTransactions, loadBudgets, saveBudgets, loadRecurring, saveRecurring, loadItems, saveItems, loadPurchases, savePurchases } from './utils/storage';
-import { loadAuthState, saveAuthState, clearAuthState, userExists, getAutoLockTimeout, validateSession } from './utils/auth';
 import { 
   loadNotificationSettings, 
   checkUpcomingBills, 
@@ -18,15 +17,16 @@ import { RecurringTransactions } from './components/RecurringTransactions';
 import { SearchAndFilter } from './components/SearchAndFilter';
 import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
-import AuthScreen from './components/AuthScreen';
 import SecuritySettings from './components/SecuritySettings';
 import Notifications from './components/Notifications';
 import NotificationSettingsComponent from './components/NotificationSettings';
 import { SyncStatusIndicator, OfflineBanner } from './components/SyncStatus';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Shield, Bell, Settings } from 'lucide-react';
+import { useAuth } from './contexts/AuthContext';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Shield, Bell, Settings, LogOut, User } from 'lucide-react';
 import './index.css';
 
 function App() {
+  const { user, logout } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
@@ -35,98 +35,8 @@ function App() {
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'security' | 'notifications' | 'notification-settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  
-  // Authentication state
-  const [authState, setAuthState] = useState<AuthState>({
-    isAuthenticated: false,
-    isLocked: true,
-    user: null,
-    lastActivity: Date.now(),
-  });
 
-  // Initialize authentication state on mount
-  useEffect(() => {
-    const initAuth = () => {
-      const savedAuthState = loadAuthState();
-      const hasUser = userExists();
-      const sessionValid = validateSession();
-
-      if (hasUser) {
-        if (savedAuthState && sessionValid) {
-          setAuthState(savedAuthState);
-        } else {
-          // Session expired or invalid, lock the app
-          setAuthState({
-            isAuthenticated: false,
-            isLocked: true,
-            user: savedAuthState?.user || null,
-            lastActivity: Date.now(),
-          });
-        }
-      } else {
-        // First time user, show setup
-        setAuthState({
-          isAuthenticated: false,
-          isLocked: true,
-          user: null,
-          lastActivity: Date.now(),
-        });
-      }
-    };
-
-    initAuth();
-  }, []);
-
-  // Auto-lock based on inactivity
-  useEffect(() => {
-    if (!authState.isAuthenticated || authState.isLocked) return;
-
-    const timeout = getAutoLockTimeout();
-    if (timeout === 0) return; // Auto-lock disabled
-
-    const checkActivity = () => {
-      const timeSinceLastActivity = Date.now() - authState.lastActivity;
-      if (timeSinceLastActivity >= timeout) {
-        handleLock();
-      }
-    };
-
-    const interval = setInterval(checkActivity, 1000); // Check every second
-    return () => clearInterval(interval);
-  }, [authState.isAuthenticated, authState.isLocked, authState.lastActivity]);
-
-  // Update activity on user interaction
-  useEffect(() => {
-    if (!authState.isAuthenticated || authState.isLocked) return;
-
-    const updateActivity = () => {
-      setAuthState(prev => ({
-        ...prev,
-        lastActivity: Date.now(),
-      }));
-    };
-
-    // Listen to various user events
-    window.addEventListener('mousedown', updateActivity);
-    window.addEventListener('keydown', updateActivity);
-    window.addEventListener('touchstart', updateActivity);
-    window.addEventListener('scroll', updateActivity);
-
-    return () => {
-      window.removeEventListener('mousedown', updateActivity);
-      window.removeEventListener('keydown', updateActivity);
-      window.removeEventListener('touchstart', updateActivity);
-      window.removeEventListener('scroll', updateActivity);
-    };
-  }, [authState.isAuthenticated, authState.isLocked]);
-
-  // Save auth state when it changes
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      saveAuthState(authState);
-    }
-  }, [authState]);
-
+  // Load initial data
   useEffect(() => {
     const loaded = loadTransactions();
     setTransactions(loaded);
@@ -150,8 +60,6 @@ function App() {
 
   // Check notifications when data changes
   useEffect(() => {
-    if (!authState.isAuthenticated) return;
-
     const checkNotifications = () => {
       const settings = loadNotificationSettings();
       const newNotifications = [];
@@ -173,7 +81,7 @@ function App() {
     };
 
     checkNotifications();
-  }, [transactions, budgets, recurring, authState.isAuthenticated]);
+  }, [transactions, budgets, recurring]);
 
   // Update unread count when active tab changes to notifications
   useEffect(() => {
@@ -303,35 +211,12 @@ function App() {
     return () => clearInterval(interval);
   }, [recurring]);
 
-  // Authentication handlers
-  const handleAuthenticated = useCallback(() => {
-    const savedAuthState = loadAuthState();
-    setAuthState({
-      isAuthenticated: true,
-      isLocked: false,
-      user: savedAuthState?.user || null,
-      lastActivity: Date.now(),
-    });
-  }, []);
-
-  const handleLock = useCallback(() => {
-    setAuthState(prev => ({
-      ...prev,
-      isLocked: true,
-    }));
-  }, []);
-
+  // Logout handler
   const handleLogout = useCallback(() => {
-    if (confirm('Are you sure you want to logout? Make sure you remember your password!')) {
-      clearAuthState();
-      setAuthState({
-        isAuthenticated: false,
-        isLocked: true,
-        user: null,
-        lastActivity: Date.now(),
-      });
+    if (confirm('Are you sure you want to logout?')) {
+      logout();
     }
-  }, []);
+  }, [logout]);
 
   const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
@@ -403,11 +288,6 @@ function App() {
     setRecurring([...recurring, ...data.recurring]);
   };
 
-  // Show auth screen if not authenticated or locked
-  if (!authState.isAuthenticated || authState.isLocked) {
-    return <AuthScreen onAuthenticated={handleAuthenticated} />;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Offline Banner */}
@@ -426,14 +306,19 @@ function App() {
               </h1>
             </div>
             
-            {/* Sync Status & Lock Button */}
+            {/* Sync Status & User Info */}
             <div className="flex items-center gap-4">
               <SyncStatusIndicator />
+              <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <User className="w-4 h-4" />
+                <span>{user?.name || user?.email}</span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                🔒 Lock
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
