@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Shield, Lock, Eye, EyeOff, Clock, AlertCircle, CheckCircle, Key, Bell, DollarSign, TrendingUp, Save } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Clock, AlertCircle, CheckCircle, Key, Bell, DollarSign, TrendingUp, Save, HardDrive } from 'lucide-react';
 import { SecuritySettings as SecuritySettingsType, NotificationSettings as NotificationSettingsType } from '../types';
 import { loadUser, updateSecuritySettings, updateUser } from '../utils/auth';
 import { hashPassword, verifyPassword, validatePasswordStrength, generateSalt } from '../utils/encryption';
 import { loadNotificationSettings, saveNotificationSettings } from '../utils/notifications';
 import DataMigration from './DataMigration';
+import AutoBackupSettings from './AutoBackupSettings';
 
 const Settings: React.FC = () => {
   const user = loadUser();
-  const [activeSection, setActiveSection] = useState<'security' | 'data' | 'notifications'>('security');
+  const [activeSection, setActiveSection] = useState<'security' | 'data' | 'backup' | 'notifications'>('security');
   
   // Security Settings State
   const [securitySettings, setSecuritySettings] = useState<SecuritySettingsType>(
@@ -133,6 +134,17 @@ const Settings: React.FC = () => {
         >
           <DollarSign className="w-4 h-4 inline mr-2" />
           Data Storage
+        </button>
+        <button
+          onClick={() => setActiveSection('backup')}
+          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            activeSection === 'backup'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          <HardDrive className="w-4 h-4 inline mr-2" />
+          Auto Backup
         </button>
         <button
           onClick={() => setActiveSection('notifications')}
@@ -386,6 +398,13 @@ const Settings: React.FC = () => {
       {activeSection === 'data' && (
         <div className="space-y-6">
           <DataMigration />
+        </div>
+      )}
+
+      {/* Auto Backup Section */}
+      {activeSection === 'backup' && (
+        <div className="space-y-6">
+          <AutoBackupSettings />
         </div>
       )}
 

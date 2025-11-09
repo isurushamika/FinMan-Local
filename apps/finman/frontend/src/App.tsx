@@ -19,6 +19,7 @@ import {
   addNotifications,
   getUnreadCount
 } from './utils/notifications';
+import { checkAndPerformAutoBackup } from './utils/autoBackup';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import SummaryCards from './components/SummaryCards';
@@ -57,6 +58,16 @@ function App() {
     const storedSubs = localStorage.getItem('financial_subscriptions');
     if (storedSubs) {
       setSubscriptions(JSON.parse(storedSubs));
+    }
+
+    // Check and perform auto-backup if needed (Electron only)
+    const isElectron = typeof (window as any).electron !== 'undefined';
+    if (isElectron) {
+      const electron = (window as any).electron;
+      const dataPath = electron.path.join(electron.app.getAppPath(), 'data', 'finman-data.enc');
+      checkAndPerformAutoBackup(dataPath).catch(err => {
+        console.error('Auto backup check failed:', err);
+      });
     }
   }, []);
 
