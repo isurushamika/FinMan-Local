@@ -95,3 +95,23 @@ Remove-Item -Recurse -Force dist, build-*
 ```
 
 Release folder builds are preserved for version history.
+
+### Cleaning Old Releases
+
+**Important:** Close all running instances of FinMan before cleaning releases.
+
+```powershell
+# Close any running FinMan instances
+Get-Process -Name "FinMan" -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# Wait a moment for file locks to release
+Start-Sleep -Seconds 2
+
+# Remove old releases (keep current ones)
+Remove-Item -Recurse -Force release\v1.0.0-* -Exclude release\v1.0.0-20251109-114936
+```
+
+If you get "file in use" errors, make sure to:
+1. Close FinMan completely
+2. Check Task Manager for any lingering processes
+3. Wait a few seconds and try again
