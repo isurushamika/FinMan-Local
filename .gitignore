@@ -13,6 +13,12 @@ build/
 **/dist/
 **/build/
 
+# Electron build outputs
+release/
+build-*/
+apps/finman/frontend/release/
+apps/finman/frontend/build-*/
+
 # Logs
 logs/
 *.log

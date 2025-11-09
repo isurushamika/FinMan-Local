@@ -1,119 +1,63 @@
-// Biometric Authentication Utility for Capacitor
-import { NativeBiometric, BiometryType } from 'capacitor-native-biometric';
+// Biometric Authentication Utility - Desktop Stub
+// Note: Biometric authentication is not available on desktop
+// This is a stub implementation for compatibility
 
 /**
  * Check if biometric authentication is available on the device
+ * Returns false on desktop platforms
  */
 export async function isBiometricAvailable(): Promise<boolean> {
-  try {
-    const result = await NativeBiometric.isAvailable();
-    return result.isAvailable;
-  } catch (error) {
-    console.error('Biometric availability check failed:', error);
-    return false;
-  }
+  // Biometric not supported on desktop Electron
+  return false;
 }
 
 /**
  * Get the type of biometric authentication available
+ * Returns 'Not Available' on desktop platforms
  */
 export async function getBiometricType(): Promise<string> {
-  try {
-    const result = await NativeBiometric.isAvailable();
-    
-    switch (result.biometryType) {
-      case BiometryType.FACE_ID:
-        return 'Face ID';
-      case BiometryType.TOUCH_ID:
-        return 'Touch ID';
-      case BiometryType.FINGERPRINT:
-        return 'Fingerprint';
-      case BiometryType.FACE_AUTHENTICATION:
-        return 'Face Authentication';
-      case BiometryType.IRIS_AUTHENTICATION:
-        return 'Iris Authentication';
-      default:
-        return 'Biometric';
-    }
-  } catch (error) {
-    console.error('Biometric type check failed:', error);
-    return 'Biometric';
-  }
+  return 'Not Available';
 }
 
 /**
  * Save credentials for biometric authentication
+ * Not supported on desktop
  */
 export async function saveBiometricCredentials(
-  username: string,
-  password: string
+  _username: string,
+  _password: string
 ): Promise<void> {
-  try {
-    await NativeBiometric.setCredentials({
-      username,
-      password,
-      server: 'finman.app'
-    });
-  } catch (error) {
-    console.error('Failed to save biometric credentials:', error);
-    throw new Error('Failed to save biometric credentials');
-  }
+  // Biometric not supported on desktop
+  console.warn('Biometric authentication not available on desktop');
 }
 
 /**
  * Get credentials using biometric authentication
+ * Not supported on desktop
  */
 export async function getBiometricCredentials(): Promise<{
   username: string;
   password: string;
 } | null> {
-  try {
-    const result = await NativeBiometric.getCredentials({
-      server: 'finman.app'
-    });
-    
-    return {
-      username: result.username,
-      password: result.password
-    };
-  } catch (error) {
-    console.error('Failed to get biometric credentials:', error);
-    return null;
-  }
+  // Biometric not supported on desktop
+  return null;
 }
 
 /**
  * Delete saved biometric credentials
+ * Not supported on desktop
  */
 export async function deleteBiometricCredentials(): Promise<void> {
-  try {
-    await NativeBiometric.deleteCredentials({
-      server: 'finman.app'
-    });
-  } catch (error) {
-    console.error('Failed to delete biometric credentials:', error);
-  }
+  // Biometric not supported on desktop
 }
 
 /**
  * Verify user identity using biometric authentication
+ * Not supported on desktop
  */
-export async function verifyBiometric(reason?: string): Promise<boolean> {
-  try {
-    const biometricType = await getBiometricType();
-    
-    await NativeBiometric.verifyIdentity({
-      reason: reason || `Use ${biometricType} to unlock FinMan`,
-      title: 'Biometric Authentication',
-      subtitle: 'Secure login with biometrics',
-      description: 'Place your finger on the sensor or look at the camera'
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('Biometric verification failed:', error);
-    return false;
-  }
+export async function verifyBiometric(_reason?: string): Promise<boolean> {
+  // Biometric not supported on desktop
+  return false;
 }
 
 /**

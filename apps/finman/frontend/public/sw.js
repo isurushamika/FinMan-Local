@@ -54,22 +54,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API calls (always fetch from network)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return new Response(
-          JSON.stringify({ error: 'Offline - API unavailable' }),
-          { 
-            status: 503,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-      })
-    );
-    return;
-  }
-
   // Cache-first strategy for static assets
   event.respondWith(
     caches.match(request).then((cachedResponse) => {

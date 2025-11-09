@@ -8,7 +8,6 @@ const SESSION_KEY = 'financial_session';
 const DEFAULT_SECURITY_SETTINGS: SecuritySettings = {
   autoLockEnabled: true,
   autoLockTimeout: 5, // 5 minutes
-  biometricEnabled: false,
   encryptionEnabled: true,
   requirePasswordOnStartup: true,
 };

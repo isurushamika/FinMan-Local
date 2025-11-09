@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Lock, Eye, EyeOff, Clock, Fingerprint, AlertCircle, CheckCircle, Key } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Clock, AlertCircle, CheckCircle, Key } from 'lucide-react';
 import { SecuritySettings as SecuritySettingsType } from '../types';
 import { loadUser, updateSecuritySettings, updateUser } from '../utils/auth';
 import { hashPassword, verifyPassword, validatePasswordStrength, generateSalt } from '../utils/encryption';
@@ -10,7 +10,6 @@ const SecuritySettings: React.FC = () => {
     user?.securitySettings || {
       autoLockEnabled: true,
       autoLockTimeout: 5,
-      biometricEnabled: false,
       encryptionEnabled: true,
       requirePasswordOnStartup: true,
     }
@@ -224,30 +223,6 @@ const SecuritySettings: React.FC = () => {
                 settings.requirePasswordOnStartup ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
-          </button>
-        </div>
-
-        {/* Biometric (Coming Soon) */}
-        <div className="flex items-start justify-between py-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Fingerprint className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              <h4 className="font-medium text-gray-800 dark:text-white">
-                Biometric Authentication
-                <span className="ml-2 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 px-2 py-0.5 rounded">
-                  Coming Soon
-                </span>
-              </h4>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Use fingerprint or face recognition (mobile devices)
-            </p>
-          </div>
-          <button
-            disabled
-            className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-600 opacity-50 cursor-not-allowed"
-          >
-            <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
           </button>
         </div>
       </div>

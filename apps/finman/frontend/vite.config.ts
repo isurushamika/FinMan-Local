@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // Change to '/finman' if deploying to https://gearsandai.me/finman
+  base: './', // Relative paths for Electron
   server: {
     port: 5173,
     host: true, // Allow access from network

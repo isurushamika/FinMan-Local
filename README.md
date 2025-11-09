@@ -1,422 +1,202 @@
-# FinMan - Personal Finance Manager# FinMan - Financial Management Application
+# FinMan - Personal Finance Manager
 
+**Offline-First Personal Finance Management Application**
 
+FinMan is a completely offline personal finance manager that runs locally on your computer. All your financial data stays on your device - no cloud, no server, no internet required!
 
-A full-stack personal finance management application with offline-first architecture, biometric authentication, and real-time sync.> **Complete Mobile + Web Financial Manager with Advanced Security**
+## 🚀 One-Click Quick Start
 
+### Windows Users
 
+**Double-click `START_FINMAN.bat`**
 
----## 📱 Project Overview
+That's it! The app will:
+1. Install dependencies automatically (first time only)
+2. Start the application
+3. Open in your default browser at `http://localhost:5173`
 
+### Alternative (PowerShell)
 
+Right-click `START_FINMAN.ps1` → "Run with PowerShell"
 
-## 🚀 Quick StartFinMan is a full-stack financial management application with:
+## ✨ Features
 
-- **Native Android App** (Capacitor)
+### 📊 Transaction Management
+- Track income and expenses
+- Categorize transactions
+- Add descriptions and accounts
+- Quick search and filtering
+- Visual charts and analytics
 
-### Your URLs- **Progressive Web App** (PWA)
+### 💰 Budget Planning
+- Create monthly/yearly budgets by category
+- Real-time budget progress tracking
+- Budget alerts and notifications
+- Overspending warnings
 
-- **Backend API**: https://api.gearsandai.me ✅ Live- **REST API Backend** (Node.js + Prisma)
+### 🔄 Recurring Transactions
+- Set up recurring bills and income
+- Daily, weekly, monthly, or yearly frequency
+- Auto-generate transactions
+- Pause/resume recurring items
 
-- **Web App**: https://app.gearsandai.me (ready to deploy)- **Ubuntu Server Deployment** ready
+### 💳 Subscription Tracking
+- Track all your subscriptions
+- Monitor recurring costs
+- Cancellation date tracking
+- Total monthly subscription costs
 
-- **GitHub**: https://github.com/isurushamika/FinMan
+### 📦 Price Tracker
+- Track item prices over time
+- Record purchase history
+- Compare prices across stores
+- Identify price trends
 
-## 🚀 Quick Start
+### 🔔 Smart Notifications
+- Upcoming bill reminders
+- Budget alert warnings
+- Configurable notification settings
+- Never miss a payment
 
-### Android APK
+### 💾 Data Management
+- Export data as JSON
+- Import data from backups
+- Clear specific data types
+- Full local storage control
 
-- **Location**: `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`### Development
+## 🔒 Privacy & Security
 
-- **Size**: 5.28 MB
+✅ **100% Offline** - No internet connection required  
+✅ **Local Storage** - All data stored in your browser  
+✅ **No Cloud** - Your data never leaves your computer  
+✅ **No Tracking** - No analytics, no telemetry  
+✅ **Open Source** - Full transparency  
 
-- **Install**: Transfer to phone and install```powershell
+## 📋 System Requirements
 
-# Install dependencies
+- **Node.js** 16 or higher ([Download here](https://nodejs.org/))
+- **Modern Web Browser** (Chrome, Edge, Firefox, Safari)
+- **Operating System**: Windows, macOS, or Linux
 
----cd apps/finman/frontend
+## 🛠️ Manual Installation
 
+If the one-click launcher doesn't work:
+
+```bash
+# Navigate to the frontend directory
+cd apps/finman/frontend
+
+# Install dependencies (first time only)
 npm install
 
-## 📱 Installation
-
-cd ../backend
-
-### Android Appnpm install
-
-1. Transfer APK to your phone
-
-2. Enable "Install from Unknown Sources"# Run development servers
-
-3. Install and open appnpm run dev  # Frontend on http://localhost:5173
-
-4. Create account or loginnpm run dev  # Backend on http://localhost:3001
-
-```
-
-### Web App
-
-```bash### Production Build
-
-.\deployment\deploy-frontend.bat
-
-# See docs/DEPLOY.md for details```powershell
-
-```# Build frontend
-
-cd apps/finman/frontend
-
----npm run build
-
-
-
-## 🛠️ Development# Build backend
-
-cd ../backend
-
-### Run Locallynpm run build
-
-```bash
-
-# Backend# Build Android APK
-
-cd apps/finman/backendcd ../frontend/android
-
-npm install.\gradlew assembleDebug
-
-npm run dev```
-
-
-
-# Frontend**APK Location:** `apps/finman/frontend/android/app/build/outputs/apk/debug/app-debug.apk`
-
-cd apps/finman/frontend
-
-npm install## ✨ Features
-
+# Start the application
 npm run dev
-
-```### Core Financial Features
-
-- ✅ **Transaction Tracking** - Income/expense management with categories
-
-### Build Android- ✅ **Budget Management** - Monthly/yearly budgets with progress tracking
-
-```bash- ✅ **Recurring Transactions** - Automated bill and payment tracking
-
-cd apps/finman/frontend- ✅ **Item Tracker** - Track purchases and item history
-
-npm run build- ✅ **Charts & Analytics** - Visual spending insights
-
-npx cap sync
-
-cd android### Smart Notifications 🔔
-
-.\gradlew assembleDebug- ✅ **Bill Reminders** - Get notified before recurring bills are due
-
-```- ✅ **Budget Alerts** - Alerts at 80%, 90%, 100% of budget
-
-- ✅ **Spending Summaries** - Daily/weekly spending reports
-
----- ✅ **Configurable Settings** - Custom thresholds and schedules
-
-
-
-## 🔄 Update VPS### Security 🔒
-
-- ✅ **Biometric Authentication** - Fingerprint/Face ID
-
-```bash- ✅ **PIN/Password Protection** - Secure app access
-
-ssh root@198.23.228.126- ✅ **Data Encryption** - AES-256-GCM encryption
-
-cd ~/FinMan- ✅ **Auto-Lock** - Configurable inactivity timeout
-
-git pull origin main- ✅ **Session Management** - Secure session handling
-
-cd apps/finman/backend
-
-npm install### Data Management
-
-pm2 restart finman-api- ✅ **Export/Import** - JSON data backup/restore
-
-```- ✅ **Search & Filter** - Advanced transaction search
-
-- ✅ **Offline Support** - Full offline functionality
-
----- ✅ **Cloud Sync Ready** - API backend for multi-device sync
-
-
-
-## 📚 Documentation## 📁 Project Structure
-
-
-
-- **[docs/DEPLOY.md](./docs/DEPLOY.md)** - Deployment guide (VPS + Web)```
-
-- **[docs/API.md](./docs/API.md)** - API documentation  financial/
-
-- **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** - Development guide├── apps/
-
-│   └── finman/
-
----│       ├── frontend/              # React + Vite + Capacitor
-
-│       │   ├── src/
-
-## ✨ Features│       │   │   ├── components/   # UI components
-
-│       │   │   ├── utils/        # Utilities (storage, auth, crypto)
-
-- Transaction management│       │   │   ├── types/        # TypeScript types
-
-- Budget tracking│       │   │   └── App.tsx       # Main application
-
-- Recurring transactions│       │   ├── android/          # Android project
-
-- Item tracking│       │   ├── public/           # Static assets
-
-- Charts & summaries│       │   └── dist/             # Production build
-
-- Offline sync│       │
-
-- Biometric auth│       └── backend/              # Node.js + Express + Prisma
-
-- Data export/import│           ├── src/
-
-- Dark mode│           │   ├── controllers/  # API controllers
-
-│           │   ├── services/     # Business logic
-
----│           │   ├── routes/       # API routes
-
-│           │   ├── middleware/   # Auth, error handling
-
-## 🔐 Tech Stack│           │   └── server.ts     # Main server
-
-│           └── prisma/           # Database schema
-
-**Backend**: Node.js, PostgreSQL, Prisma, JWT  │
-
-**Frontend**: React, TypeScript, Capacitor  ├── deployment/                   # Nginx & PM2 configs
-
-**Infrastructure**: VPS, Nginx, SSL, PM2└── docs/                         # Documentation
-
-
-
----```
-
-
-
-*Last Updated: October 5, 2025*## 🛠️ Technology Stack
-
-
-### Frontend
-- **Framework:** React 18 + TypeScript
-- **Build Tool:** Vite
-- **Mobile:** Capacitor 7.x
-- **Styling:** Tailwind CSS
-- **Charts:** Chart.js + react-chartjs-2
-- **Icons:** Lucide React
-- **Date Handling:** date-fns
-
-### Backend
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Authentication:** JWT + bcrypt
-- **File Upload:** Multer
-
-### Security
-- **Encryption:** Web Crypto API (AES-256-GCM)
-- **Biometric:** Capacitor Native Biometric
-- **Storage:** Encrypted localStorage
-
-## 📝 Build Requirements
-
-### For Web App
-- Node.js 18+
-- npm or yarn
-
-### For Android APK
-- **Java Development Kit:** JDK 21 (required)
-  - Download: https://adoptium.net/temurin/releases/?version=21
-  - Set `JAVA_HOME` or configure in `android/gradle.properties`
-- **Android SDK:** Installed (command-line tools sufficient)
-- **Gradle:** 8.11+ (included in project)
-
-**Note:** Android Studio is **not** required for building APKs. Use `gradlew` command-line tool.
-
-## 🔧 Configuration Files
-
-### Frontend Configuration
-- `package.json` - Dependencies and scripts
-- `vite.config.ts` - Vite build configuration
-- `capacitor.config.ts` - Capacitor/Android settings
-- `tailwind.config.js` - Tailwind CSS configuration
-- `tsconfig.json` - TypeScript configuration
-
-### Android Configuration
-- `android/build.gradle` - Android Gradle Plugin 8.7.2
-- `android/gradle.properties` - Java 21 path, JVM settings
-- `android/app/build.gradle` - App-specific build settings
-- `android/variables.gradle` - Android SDK versions
-
-### Backend Configuration
-- `package.json` - Dependencies and scripts
-- `tsconfig.json` - TypeScript configuration
-- `prisma/schema.prisma` - Database schema
-
-## 🌐 Deployment
-
-### Ubuntu Server Deployment
-
-Complete deployment guide: [UBUNTU_DEPLOYMENT.md](UBUNTU_DEPLOYMENT.md)
-
-**Quick Deploy:**
-```bash
-cd deployment
-chmod +x finman-deploy.sh
-./finman-deploy.sh
 ```
 
-**Services:**
-- Frontend: http://yourdomain.com/finman (or subdomain)
-- Backend: http://yourdomain.com/api/finman
-- PM2 process management for backend
+Then open your browser to `http://localhost:5173`
 
-### Android APK Distribution
+## 📱 Usage Guide
 
-1. **Build Release APK:**
-   ```powershell
-   cd apps/finman/frontend/android
-   .\gradlew assembleRelease
-   ```
+### First Time Setup
+1. Launch the application using `START_FINMAN.bat`
+2. The app opens in your browser
+3. Start adding transactions from the "Add New" tab
 
-2. **Sign APK** (for production):
-   - Generate keystore
-   - Configure signing in `android/app/build.gradle`
-   - Build signed APK
+### Daily Use
+1. Double-click `START_FINMAN.bat` to launch
+2. Add/view transactions
+3. Check your dashboard for insights
+4. Review budgets and spending
+5. Close browser tab when done (data is automatically saved)
 
-3. **Distribute:**
-   - Direct APK distribution
-   - Google Play Store (with signed release)
-   - Enterprise app stores
+### Data Backup
+1. Go to the "Data" tab
+2. Click "Export All Data"
+3. Save the JSON file to a safe location
+4. Use "Import Data" to restore from a backup
 
-## 📖 Additional Documentation
+## 🔧 Troubleshooting
 
-- **[CAPACITOR_BUILD_GUIDE.md](CAPACITOR_BUILD_GUIDE.md)** - Complete Capacitor setup
-- **[JAVA17_SETUP.md](apps/finman/frontend/JAVA17_SETUP.md)** - Java 21 installation guide
-- **[UBUNTU_DEPLOYMENT.md](UBUNTU_DEPLOYMENT.md)** - Server deployment guide
-- **[SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)** - Security features
-- **[API.md](apps/finman/backend/docs/API.md)** - Backend API documentation
+### App won't start
+- Ensure Node.js is installed: `node --version`
+- Delete `node_modules` folder and try again
+- Run `npm install` manually in the frontend directory
 
-## 🧹 Maintenance
+### Data disappeared
+- Data is stored in browser localStorage
+- Clearing browser cache removes data
+- Always keep regular backups using the Export feature
 
-### Clean Build Artifacts
-```powershell
-.\cleanup.bat
+### Browser compatibility
+- Use a modern browser (Chrome, Edge, Firefox recommended)
+- Enable JavaScript and localStorage
+- Don't use private/incognito mode (data won't persist)
+
+### Port already in use
+- If port 5173 is busy, the app will use a different port
+- Check the terminal output for the correct URL
+
+## 💡 Tips
+
+- **Regular Backups**: Export your data weekly
+- **Browser Bookmarks**: Bookmark `http://localhost:5173` for quick access
+- **Multiple Devices**: Export/import data to sync between computers
+- **Data Safety**: Your data is stored in browser localStorage - don't clear browsing data!
+
+## 🎨 Customization
+
+The app includes:
+- 🌓 Dark mode support
+- 📊 Multiple chart visualizations
+- 🔍 Advanced filtering
+- 📱 Responsive design for all screen sizes
+
+## 📁 Project Structure
+
+```
+financial-local/
+├── START_FINMAN.bat          # One-click launcher (Windows)
+├── START_FINMAN.ps1          # PowerShell launcher
+└── apps/finman/frontend/     # Application code
+    ├── src/                  # Source code
+    ├── public/               # Static assets
+    └── package.json          # Dependencies
 ```
 
-Removes:
-- Frontend/backend build directories
-- Android build artifacts
-- Gradle cache
-- Temporary files
+## 🚫 What's Not Included
 
-### Update Dependencies
-```powershell
-# Frontend
-cd apps/finman/frontend
-npm update
+This is a **local-only** version. It does NOT include:
+- ❌ Cloud sync
+- ❌ Multi-device sync
+- ❌ User authentication
+- ❌ Online backup
+- ❌ Mobile app
+- ❌ API server
+- ❌ Database server
 
-# Backend
-cd ../backend
-npm update
-```
+Your data is stored entirely in your browser's localStorage.
 
-## 🐛 Troubleshooting
+## 🆘 Support
 
-### Build Issues
-
-**TypeScript Errors:**
-```powershell
-npm run build 2>&1 | Select-String "error"
-```
-
-**Android Build Fails:**
-- Verify Java 21 is installed: `java -version`
-- Check Gradle daemon: `.\gradlew --version`
-- Clean build: `.\gradlew clean`
-
-**Biometric Not Working:**
-- Test on physical device (not emulator)
-- Check Android permissions
-- Verify device has biometric hardware
-
-### Common Solutions
-
-1. **"Java 17/21 required" error:**
-   - Install correct JDK version
-   - Update `android/gradle.properties`
-
-2. **"Module not found" errors:**
-   - Delete `node_modules`
-   - Run `npm install`
-
-3. **Capacitor sync issues:**
-   - Run `npx cap sync android`
-   - Rebuild Android project
-
-## 📊 Performance
-
-### Bundle Sizes (Production)
-- **Frontend:**
-  - HTML: 0.49 KB
-  - CSS: 24.88 KB (gzipped: 4.98 KB)
-  - JavaScript: 405.92 KB (gzipped: 128.80 KB)
-  
-- **Android APK:**
-  - Debug: ~5.3 MB
-  - Release (minified): ~4.5 MB
-
-### Optimization
-- ✅ Code splitting with Vite
-- ✅ Tree shaking enabled
-- ✅ Gzip compression
-- ✅ Lazy loading for components
-- ✅ Development-only console logs
-- ✅ Encrypted local storage
-
-## 🔐 Security Best Practices
-
-1. **Change default encryption key** in production
-2. **Use HTTPS** for backend API
-3. **Enable biometric auth** for sensitive operations
-4. **Set auto-lock timeout** appropriately
-5. **Regular data backups** via export feature
-6. **Keep dependencies updated** for security patches
+For issues or questions:
+1. Check the Troubleshooting section above
+2. Review browser console for errors (F12)
+3. Ensure you're using a supported browser
+4. Verify Node.js is installed correctly
 
 ## 📄 License
 
-Private project - All rights reserved
+MIT License - Feel free to use and modify for personal use.
 
-## 👤 Author
+## 🔄 Updates
 
-**Isuru Shamika**
-- GitHub: [@isurushamika](https://github.com/isurushamika)
-
-## 🙏 Acknowledgments
-
-- React Team
-- Capacitor Team
-- Tailwind CSS
-- Chart.js
-- All open-source contributors
+To update the application:
+1. Pull the latest code
+2. Run `npm install` in the frontend directory
+3. Restart the application
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** October 2025  
-**Status:** Production Ready ✅
+**Made with ❤️ for local, private, offline personal finance management**
+
+*Your money, your data, your device. Period.*

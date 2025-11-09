@@ -1,7 +1,7 @@
 {
   "name": "FinMan - Financial Manager",
   "short_name": "FinMan",
-  "description": "Secure personal finance management with encryption and biometric authentication",
+  "description": "Secure offline personal finance management with encryption",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1e293b",
@@ -67,12 +67,6 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ],
   "share_target": {

@@ -1,11 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Transaction, Budget, RecurringTransaction, Item, ItemPurchase, BudgetProgress, Subscription } from './types';
-import { transactionsApi } from './api/transactions';
-import { budgetsApi } from './api/budgets';
-import { recurringApi } from './api/recurring';
-import { itemsApi } from './api/items';
-import { purchasesApi } from './api/purchases';
-import { subscriptionsApi } from './api/subscriptions';
+import { 
+  loadTransactions, 
+  saveTransactions, 
+  loadBudgets, 
+  saveBudgets, 
+  loadRecurring, 
+  saveRecurring,
+  loadItems,
+  saveItems,
+  loadPurchases,
+  savePurchases
+} from './utils/storage';
 import { 
   loadNotificationSettings, 
   checkUpcomingBills, 
@@ -25,13 +31,10 @@ import { DataManagement } from './components/DataManagement';
 import ItemTracker from './components/ItemTracker';
 import SettingsComponent from './components/Settings';
 import Notifications from './components/Notifications';
-import { OfflineBanner } from './components/SyncStatus';
-import { useAuth } from './contexts/AuthContext';
-import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, LogOut, User, CreditCard, RefreshCw } from 'lucide-react';
+import { BarChart3, Plus, List, Wallet, Repeat, Download, Package, Bell, Settings, CreditCard } from 'lucide-react';
 import './index.css';
 
 function App() {
-  const { user, logout } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
@@ -42,54 +45,20 @@ function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'add' | 'budgets' | 'recurring' | 'items' | 'subscriptions' | 'settings' | 'data'>('dashboard');
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch all data from API
-  const fetchAllData = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const [transactionsData, budgetsData, recurringData, itemsData, purchasesData, subscriptionsData] = await Promise.all([
-        transactionsApi.getAll(),
-        budgetsApi.getAll(),
-        recurringApi.getAll(),
-        itemsApi.getAll(),
-        purchasesApi.getAll(),
-        subscriptionsApi.getAll(),
-      ]);
-      
-      setTransactions(transactionsData as any);
-      setFilteredTransactions(transactionsData as any);
-      setBudgets(budgetsData as any);
-      setRecurring(recurringData as any);
-      setItems(itemsData as any);
-      setPurchases(purchasesData as any);
-      setSubscriptions(subscriptionsData as any);
-      
-      // Clear localStorage since we're using API mode
-      localStorage.removeItem('financial_transactions');
-      localStorage.removeItem('financial_budgets');
-      localStorage.removeItem('financial_recurring');
-      localStorage.removeItem('financial_items');
-      localStorage.removeItem('financial_purchases');
-    } catch (error: any) {
-      console.error('Failed to load data:', error);
-      
-      // Check if it's an authentication error
-      if (error?.status === 401) {
-        alert('Your session has expired. Please log in again.');
-        logout();
-      } else {
-        alert(`Failed to sync data from server: ${error?.message || 'Unknown error'}. Please try again.`);
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [logout]);
-
-  // Load initial data from API
+  // Load initial data from localStorage
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    setTransactions(loadTransactions());
+    setBudgets(loadBudgets());
+    setRecurring(loadRecurring());
+    setItems(loadItems());
+    setPurchases(loadPurchases());
+    // Load subscriptions from localStorage (using a similar pattern)
+    const storedSubs = localStorage.getItem('financial_subscriptions');
+    if (storedSubs) {
+      setSubscriptions(JSON.parse(storedSubs));
+    }
+  }, []);
 
   // Check notifications when data changes
   useEffect(() => {
@@ -228,161 +197,110 @@ function App() {
     return () => clearInterval(interval);
   }, [recurring]);
 
-  // Logout handler
-  const handleLogout = useCallback(() => {
-    if (confirm('Are you sure you want to logout?')) {
-      logout();
-    }
-  }, [logout]);
-
-  const handleAddTransaction = async (transaction: Omit<Transaction, 'id'>) => {
-    try {
-      const newTransaction = await transactionsApi.create(transaction as any);
-      setTransactions([...transactions, newTransaction as any]);
-      setActiveTab('transactions');
-    } catch (error) {
-      console.error('Failed to add transaction:', error);
-      alert('Failed to add transaction. Please try again.');
-    }
+  const handleAddTransaction = (transaction: Omit<Transaction, 'id'>) => {
+    const newTransaction: Transaction = {
+      ...transaction,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...transactions, newTransaction];
+    setTransactions(updated);
+    saveTransactions(updated);
+    setActiveTab('transactions');
   };
 
-  const handleDeleteTransaction = async (id: string) => {
+  const handleDeleteTransaction = (id: string) => {
     if (!confirm('Are you sure you want to delete this transaction?')) {
       return;
     }
 
-    try {
-      await transactionsApi.delete(id);
-      setTransactions(prev => prev.filter((t) => t.id !== id));
-      setFilteredTransactions(prev => prev.filter((t) => t.id !== id));
-      
-      // Optionally refresh all data to ensure sync
-      try {
-        const updatedTransactions = await transactionsApi.getAll();
-        setTransactions(updatedTransactions as any);
-        setFilteredTransactions(updatedTransactions as any);
-      } catch (refreshError) {
-        console.error('Failed to refresh transactions after delete:', refreshError);
-      }
-    } catch (error) {
-      console.error('Failed to delete transaction:', error);
-      alert('Failed to delete transaction. Please check your connection and try again.');
-      
-      // Refresh to ensure we have latest state
-      try {
-        const updatedTransactions = await transactionsApi.getAll();
-        setTransactions(updatedTransactions as any);
-        setFilteredTransactions(updatedTransactions as any);
-      } catch (refreshError) {
-        console.error('Failed to refresh transactions:', refreshError);
-      }
-    }
+    const updated = transactions.filter((t) => t.id !== id);
+    setTransactions(updated);
+    setFilteredTransactions(prev => prev.filter((t) => t.id !== id));
+    saveTransactions(updated);
   };
 
-  const handleAddBudget = async (budget: Omit<Budget, 'id'>) => {
-    try {
-      const newBudget = await budgetsApi.create(budget as any);
-      setBudgets([...budgets, newBudget as any]);
-    } catch (error) {
-      console.error('Failed to add budget:', error);
-      alert('Failed to add budget. Please try again.');
-    }
+  const handleAddBudget = (budget: Omit<Budget, 'id'>) => {
+    const newBudget: Budget = {
+      ...budget,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...budgets, newBudget];
+    setBudgets(updated);
+    saveBudgets(updated);
   };
 
-  const handleDeleteBudget = async (id: string) => {
+  const handleDeleteBudget = (id: string) => {
     if (confirm('Are you sure you want to delete this budget?')) {
-      try {
-        await budgetsApi.delete(id);
-        setBudgets(budgets.filter((b) => b.id !== id));
-      } catch (error) {
-        console.error('Failed to delete budget:', error);
-        alert('Failed to delete budget. Please try again.');
-      }
+      const updated = budgets.filter((b) => b.id !== id);
+      setBudgets(updated);
+      saveBudgets(updated);
     }
   };
 
-  const handleAddRecurring = async (rec: Omit<RecurringTransaction, 'id'>) => {
-    try {
-      const newRecurring = await recurringApi.create(rec as any);
-      setRecurring([...recurring, newRecurring as any]);
-    } catch (error) {
-      console.error('Failed to add recurring transaction:', error);
-      alert('Failed to add recurring transaction. Please try again.');
-    }
+  const handleAddRecurring = (rec: Omit<RecurringTransaction, 'id'>) => {
+    const newRecurring: RecurringTransaction = {
+      ...rec,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...recurring, newRecurring];
+    setRecurring(updated);
+    saveRecurring(updated);
   };
 
-  const handleToggleRecurring = async (id: string) => {
-    const item = recurring.find(r => r.id === id);
-    if (item) {
-      try {
-        await recurringApi.update(id, { isActive: !item.isActive } as any);
-        setRecurring(recurring.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r)));
-      } catch (error) {
-        console.error('Failed to toggle recurring transaction:', error);
-        alert('Failed to toggle recurring transaction. Please try again.');
-      }
-    }
+  const handleToggleRecurring = (id: string) => {
+    const updated = recurring.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r));
+    setRecurring(updated);
+    saveRecurring(updated);
   };
 
-  const handleDeleteRecurring = async (id: string) => {
+  const handleDeleteRecurring = (id: string) => {
     if (confirm('Are you sure you want to delete this recurring transaction?')) {
-      try {
-        await recurringApi.delete(id);
-        setRecurring(recurring.filter((r) => r.id !== id));
-      } catch (error) {
-        console.error('Failed to delete recurring transaction:', error);
-        alert('Failed to delete recurring transaction. Please try again.');
-      }
+      const updated = recurring.filter((r) => r.id !== id);
+      setRecurring(updated);
+      saveRecurring(updated);
     }
   };
 
-  const handleAddItem = async (item: Omit<Item, 'id'>) => {
-    try {
-      const newItem = await itemsApi.create(item as any);
-      setItems([...items, newItem as any]);
-    } catch (error) {
-      console.error('Failed to add item:', error);
-      alert('Failed to add item. Please try again.');
-    }
+  const handleAddItem = (item: Omit<Item, 'id'>) => {
+    const newItem: Item = {
+      ...item,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...items, newItem];
+    setItems(updated);
+    saveItems(updated);
   };
 
-  const handleDeleteItem = async (id: string) => {
-    try {
-      await itemsApi.delete(id);
-      setItems(items.filter((item) => item.id !== id));
-      setPurchases(purchases.filter((purchase) => purchase.itemId !== id));
-    } catch (error) {
-      console.error('Failed to delete item:', error);
-      alert('Failed to delete item. Please try again.');
-    }
+  const handleDeleteItem = (id: string) => {
+    const updatedItems = items.filter((item) => item.id !== id);
+    const updatedPurchases = purchases.filter((purchase) => purchase.itemId !== id);
+    setItems(updatedItems);
+    setPurchases(updatedPurchases);
+    saveItems(updatedItems);
+    savePurchases(updatedPurchases);
   };
 
   // Subscription handlers
-  const handleAddSubscription = async (subscription: Omit<Subscription, 'id'>) => {
-    try {
-      const newSubscription = await subscriptionsApi.create(subscription);
-      setSubscriptions([...subscriptions, newSubscription as any]);
-    } catch (error) {
-      console.error('Failed to add subscription:', error);
-    }
+  const handleAddSubscription = (subscription: Omit<Subscription, 'id'>) => {
+    const newSubscription: Subscription = {
+      ...subscription,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+    };
+    const updated = [...subscriptions, newSubscription];
+    setSubscriptions(updated);
+    localStorage.setItem('financial_subscriptions', JSON.stringify(updated));
   };
 
-  const handleUpdateSubscription = async (id: string, subscription: Partial<Subscription>) => {
-    try {
-      const updated = await subscriptionsApi.update(id, subscription);
-      setSubscriptions(subscriptions.map(s => s.id === id ? updated as any : s));
-    } catch (error) {
-      console.error('Failed to update subscription:', error);
-    }
+  const handleUpdateSubscription = (id: string, subscription: Partial<Subscription>) => {
+    const updated = subscriptions.map(s => s.id === id ? { ...s, ...subscription } : s);
+    setSubscriptions(updated);
+    localStorage.setItem('financial_subscriptions', JSON.stringify(updated));
   };
 
-  const handleDeleteSubscription = async (id: string) => {
-    try {
-      await subscriptionsApi.delete(id);
-      setSubscriptions(subscriptions.filter(s => s.id !== id));
-    } catch (error) {
-      console.error('Failed to delete subscription:', error);
-    }
+  const handleDeleteSubscription = (id: string) => {
+    const updated = subscriptions.filter(s => s.id !== id);
+    setSubscriptions(updated);
+    localStorage.setItem('financial_subscriptions', JSON.stringify(updated));
   };
 
   const handleImportData = (data: {
@@ -397,9 +315,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Offline Banner */}
-      <OfflineBanner />
-      
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -409,32 +324,12 @@ function App() {
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                FinMan
+                FinMan - Personal Finance Manager
               </h1>
             </div>
             
-            {/* User Info & Actions */}
+            {/* User Actions */}
             <div className="flex items-center gap-4">
-              {/* Refresh/Sync Button */}
-              <button
-                onClick={fetchAllData}
-                disabled={isRefreshing}
-                className={`flex items-center gap-2 text-sm px-3 py-1 rounded-lg transition-colors ${
-                  isRefreshing 
-                    ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' 
-                    : 'text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-                title="Refresh all data"
-              >
-                <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden lg:inline">{isRefreshing ? 'Syncing...' : 'Sync'}</span>
-              </button>
-              
-              <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <User className="w-4 h-4" />
-                <span>{user?.name || user?.email}</span>
-              </div>
-              
               {/* Notification Bell */}
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -446,14 +341,6 @@ function App() {
                     {unreadNotifications}
                   </span>
                 )}
-              </button>
-              
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>

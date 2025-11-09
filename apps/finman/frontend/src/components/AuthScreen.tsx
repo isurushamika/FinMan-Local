@@ -1,14 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Lock, Eye, EyeOff, Shield, AlertCircle, CheckCircle, Fingerprint } from 'lucide-react';
+import React, { useState } from 'react';
+import { Lock, Eye, EyeOff, Shield, AlertCircle, CheckCircle } from 'lucide-react';
 import { hashPassword, generateSalt, verifyPassword, validatePasswordStrength, isCryptoAvailable } from '../utils/encryption';
 import { createUser, saveUser, loadUser, updateLastLogin } from '../utils/auth';
-import { 
-  isNativeApp, 
-  isBiometricAvailable, 
-  getBiometricType,
-  saveBiometricCredentials,
-  authenticateWithBiometrics 
-} from '../utils/biometric';
 
 interface AuthScreenProps {
   onAuthenticated: () => void;
@@ -21,28 +14,11 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricType, setBiometricType] = useState('Biometric');
 
   const existingUser = loadUser();
   const isFirstTimeSetup = !existingUser;
 
   const passwordStrength = isFirstTimeSetup ? validatePasswordStrength(password) : null;
-
-  // Check biometric availability on mount
-  useEffect(() => {
-    const checkBiometric = async () => {
-      if (isNativeApp()) {
-        const available = await isBiometricAvailable();
-        setBiometricAvailable(available);
-        if (available) {
-          const type = await getBiometricType();
-          setBiometricType(type);
-        }
-      }
-    };
-    checkBiometric();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,15 +45,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
         const user = createUser(username || 'User', passwordHash, salt);
         saveUser(user);
         
-        // Save credentials for biometric auth if available
-        if (isNativeApp() && biometricAvailable && user.securitySettings.biometricEnabled) {
-          try {
-            await saveBiometricCredentials(user.username, password);
-          } catch (err) {
-            console.error('Failed to save biometric credentials:', err);
-          }
-        }
-        
         updateLastLogin();
         onAuthenticated();
       } else {
@@ -97,46 +64,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBiometricLogin = async () => {
-    if (!isNativeApp()) {
-      setError('Biometric authentication is only available in the mobile app');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-
-    try {
-      const credentials = await authenticateWithBiometrics();
-      
-      if (!credentials) {
-        throw new Error('Biometric authentication failed');
-      }
-
-      if (!existingUser) {
-        throw new Error('No user found. Please set up your account first.');
-      }
-
-      // Verify the stored password
-      const isValid = await verifyPassword(
-        credentials.password, 
-        existingUser.salt, 
-        existingUser.passwordHash
-      );
-      
-      if (!isValid) {
-        throw new Error('Authentication failed');
-      }
-
-      updateLastLogin();
-      onAuthenticated();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Biometric authentication failed');
     } finally {
       setLoading(false);
     }
@@ -303,18 +230,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
                 'Unlock'
               )}
             </button>
-
-            {/* Biometric Login (for existing users) */}
-            {!isFirstTimeSetup && biometricAvailable && (
-              <button
-                type="button"
-                onClick={handleBiometricLogin}
-                className="btn btn-secondary w-full flex items-center justify-center gap-2"
-              >
-                <Fingerprint className="w-5 h-5" />
-                Use {biometricType}
-              </button>
-            )}
           </form>
 
           {/* Footer */}

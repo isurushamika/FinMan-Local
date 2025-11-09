@@ -114,7 +114,6 @@ export interface User {
 export interface SecuritySettings {
   autoLockEnabled: boolean;
   autoLockTimeout: number; // minutes
-  biometricEnabled: boolean;
   encryptionEnabled: boolean;
   requirePasswordOnStartup: boolean;
 }
